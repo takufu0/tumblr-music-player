@@ -234,9 +234,11 @@ body { font-family: Arial, sans-serif; background: transparent; }
       rgba(12, 10, 14, 0.40)
     ),
     url("marble.png");
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+
+  background-size: 330px auto;
+background-position: top center;
+background-repeat: no-repeat;
+background-color: #171619;
 
   color: #e6e0df;
   border: 2px solid #0d0d0d;
@@ -248,7 +250,12 @@ body { font-family: Arial, sans-serif; background: transparent; }
     0 12px 35px rgba(0,0,0,.85),
     inset 0 0 22px rgba(0,0,0,.8);
 
-  position: fixed;
+  transition:
+  height 0.35s ease,
+  width 0.35s ease,
+  box-shadow 0.35s ease;
+  
+    position: fixed;
 }
 
 /* Inner ornamental silver frame */
@@ -256,7 +263,7 @@ body { font-family: Arial, sans-serif; background: transparent; }
   content: "";
   position: absolute;
   inset: 7px;
-  border: 1px solid rgba(192,183,185,.48);
+  border: 1px solid rgba(33, 33, 33, 0.48);
   pointer-events: none;
   z-index: 10;
 }
@@ -289,6 +296,17 @@ body { font-family: Arial, sans-serif; background: transparent; }
     top right,
     bottom left,
     bottom right;
+}
+
+/* Smaller corner ornaments when minimized */
+#tm-player.minimized::after {
+  inset: -13px;
+
+  background-size:
+    65px 65px,
+    65px 65px,
+    65px 65px,
+    65px 65px;
 }
 
 /* Keep the player contents underneath the decorative corner layer. */
@@ -325,7 +343,7 @@ body { font-family: Arial, sans-serif; background: transparent; }
 .tm-header-buttons button {
   background: linear-gradient(145deg, #77717a, #29262d);
   color: #eee7e5;
-  border: 1px solid #aaa0a1;
+  border: 1px solid #1b1a1a;
   border-radius: 2px;
   box-shadow: inset 0 1px 2px rgba(255,255,255,.2);
 }
@@ -348,7 +366,7 @@ body { font-family: Arial, sans-serif; background: transparent; }
   box-shadow:
     0 8px 25px rgba(0,0,0,.9),
     0 0 0 2px #817980,
-    inset 0 0 0 2px #b1a6a8;
+    inset 0 0 0 2px #100f0f;
 }
 
 #tm-vinyl-label {
@@ -438,7 +456,7 @@ body { font-family: Arial, sans-serif; background: transparent; }
 /* Ornamental dividers and tool buttons */
 #tm-tools {
   border-top: 1px solid #6c646e;
-  border-bottom: 1px solid #49434b;
+  border-bottom: 1px solid rgb(28, 28, 28);
   padding: 12px 3px;
 }
 
@@ -490,12 +508,58 @@ body { font-family: Arial, sans-serif; background: transparent; }
 
 #tm-volume { accent-color: #b9aab3; }
 
-/* Reopen button */
+/* Gothic marble reopen button */
 #tm-player-toggle {
-  background: linear-gradient(145deg, #bdb2b3, #514b55);
-  color: #171419;
-  border: 2px solid #d4c8c8;
-  box-shadow: 0 3px 15px rgba(0,0,0,.7);
+  display: none;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 999998;
+
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  overflow: hidden;
+
+  background:
+    linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.55)),
+    url("marble.png");
+
+  background-size: cover;
+  background-position: center;
+
+  border: 2px solid #242020;
+  box-shadow:
+    0 3px 15px rgba(0,0,0,.8),
+    inset 0 0 8px rgba(0,0,0,.7);
+
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+#tm-player-toggle.visible {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#tm-player-toggle:hover {
+  border-color: #77717a;
+  filter: brightness(1.2);
+}
+
+#tm-player-toggle img {
+  width: 95%;
+  height: 95%;
+  object-fit: contain;
+  display: block;
+  pointer-events: none;
+transition: filter 0.3s ease;
+}
+
+#tm-player-toggle:hover img {
+  filter: invert(1);
 }
 
 #tm-player-toggle:hover { background: #e0d5d3; }
@@ -557,7 +621,7 @@ body { font-family: Arial, sans-serif; background: transparent; }
           <line x1="92" y1="32" x2="72" y2="114" stroke="url(#silver-metal)" stroke-width="5" stroke-linecap="round" filter="url(#tonearm-shadow)"/>
           <g transform="translate(68, 106) rotate(-18)">
             <rect x="0" y="0" width="11" height="22" rx="2" fill="url(#silver-metal)" stroke="#66666d" stroke-width="0.7"/>
-            <rect x="1" y="16" width="9" height="6" rx="1" fill="#d71932"/>
+            <rect x="1" y="16" width="9" height="6" rx="1" fill="#171419"/>
           </g>
         </g>
       </svg>
@@ -602,7 +666,9 @@ body { font-family: Arial, sans-serif; background: transparent; }
   </div>
 </div>
 
-<button id="tm-player-toggle">♫</button>
+<button id="tm-player-toggle" aria-label="Reopen music player">
+  <img src="sheep.png" alt="">
+</button>
 <div id="tm-whyp-host"></div>
 
 <script>
