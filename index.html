@@ -10,12 +10,12 @@
 html, body { margin: 0; padding: 0; width: 100%; min-height: 100%; overflow: hidden; }
 body { font-family: Arial, sans-serif; background: transparent; }
 
-/* The Tumblr-side iframe follows this player and is resized to its exact bounds. */
 #tm-player {
   position: fixed;
-  left: 0;
-  top: 0;
+  left: 15px;
+  top: 15px;
   width: 330px;
+  overflow: visible;
   max-width: 100vw;
   padding: 16px;
   background: #101014;
@@ -24,6 +24,7 @@ body { font-family: Arial, sans-serif; background: transparent; }
   border-radius: 16px;
   box-shadow: 0 10px 35px rgba(0,0,0,.65);
   z-index: 999999;
+  isolation: isolate;
 }
 #tm-player.tm-dragging { transition: none; }
 #tm-player.hidden { display: none; }
@@ -222,11 +223,9 @@ body { font-family: Arial, sans-serif; background: transparent; }
   overflow: hidden; opacity: 0; pointer-events: none; z-index: -1;
 }
 
-
 /* ==========================================
    GOTHIC VICTORIAN MUSIC BOX REDESIGN
    ========================================== */
-
 
 #tm-player {
   background:
@@ -235,13 +234,12 @@ body { font-family: Arial, sans-serif; background: transparent; }
       rgba(12, 10, 14, 0.40)
     ),
     url("marble.png");
-
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
 
   color: #e6e0df;
-  border: 2px solid #77717a;
+  border: 2px solid #0d0d0d;
   border-radius: 5px;
 
   box-shadow:
@@ -263,11 +261,37 @@ body { font-family: Arial, sans-serif; background: transparent; }
   z-index: 10;
 }
 
-/* Subtle marble veining */
+/* Four separate ornaments, with the decorative layer extending
+   beyond the player so the images are not clipped at its edges. */
 #tm-player::after {
-  content: none;
+  content: "";
+  position: absolute;
+  inset: -15px;
+  pointer-events: none;
+  z-index: 20;
+
+  background-image:
+    url("corner-tl.png"),
+    url("corner-tr.png"),
+    url("corner-bl.png"),
+    url("corner-br.png");
+
+  background-repeat: no-repeat;
+
+  background-size:
+    85px 85px,
+    85px 85px,
+    85px 85px,
+    85px 85px;
+
+  background-position:
+    top left,
+    top right,
+    bottom left,
+    bottom right;
 }
 
+/* Keep the player contents underneath the decorative corner layer. */
 #tm-player > * {
   position: relative;
   z-index: 1;
@@ -333,9 +357,7 @@ body { font-family: Arial, sans-serif; background: transparent; }
   box-shadow: 0 0 0 1px #aaa0a1;
 }
 
-.tm-note {
-  color: #28232b;
-}
+.tm-note { color: #28232b; }
 
 #tm-vinyl-spindle {
   background: #e1d8d5;
@@ -411,9 +433,7 @@ body { font-family: Arial, sans-serif; background: transparent; }
   background: linear-gradient(145deg, #e3d9d6, #8c8188);
 }
 
-#tm-controls button.active {
-  color: #e5c8cf;
-}
+#tm-controls button.active { color: #e5c8cf; }
 
 /* Ornamental dividers and tool buttons */
 #tm-tools {
@@ -447,9 +467,7 @@ body { font-family: Arial, sans-serif; background: transparent; }
   font-family: Georgia, serif;
 }
 
-.tm-song:hover {
-  background: rgba(190,180,190,.12);
-}
+.tm-song:hover { background: rgba(190,180,190,.12); }
 
 .tm-song.active {
   background: linear-gradient(90deg, rgba(150,125,140,.22), transparent);
@@ -462,9 +480,7 @@ body { font-family: Arial, sans-serif; background: transparent; }
   font-style: italic;
 }
 
-.tm-song-playing {
-  color: #d6c3ce;
-}
+.tm-song-playing { color: #d6c3ce; }
 
 /* Volume panel */
 #tm-volume-panel {
@@ -472,9 +488,7 @@ body { font-family: Arial, sans-serif; background: transparent; }
   color: #d1c5c7;
 }
 
-#tm-volume {
-  accent-color: #b9aab3;
-}
+#tm-volume { accent-color: #b9aab3; }
 
 /* Reopen button */
 #tm-player-toggle {
@@ -484,25 +498,17 @@ body { font-family: Arial, sans-serif; background: transparent; }
   box-shadow: 0 3px 15px rgba(0,0,0,.7);
 }
 
-#tm-player-toggle:hover {
-  background: #e0d5d3;
-}
+#tm-player-toggle:hover { background: #e0d5d3; }
 
 /* Minimized music box */
-#tm-player.minimized {
-  border-radius: 4px;
-}
+#tm-player.minimized { border-radius: 4px; }
 
 /* Playlist scrollbar */
-#tm-playlist::-webkit-scrollbar-track {
-  background: #17151a;
-}
-
+#tm-playlist::-webkit-scrollbar-track { background: #17151a; }
 #tm-playlist::-webkit-scrollbar-thumb {
   background: #827782;
   border-radius: 2px;
 }
-
 </style>
 </head>
 <body>
@@ -600,7 +606,6 @@ body { font-family: Arial, sans-serif; background: transparent; }
 <div id="tm-whyp-host"></div>
 
 <script>
-/* SONG LIST — kept exactly as supplied */
 const tmSongs = [
   { title: "Roxanne [Slowed]", artist: "Arizona Zervas", embed: "https://whyp.it/embeds/track/3GZ75tAEUhsB?preset=CwtNL6OcYsqs&showLink=false", cover: "roxanne.jpg" },
   { title: "Jealous Type", artist: "Doja Cat", embed: "https://whyp.it/embeds/track/aziEBeNCodse?preset=CwtNL6OcYsqs&showLink=false", cover: "jealos.jpe" },
@@ -614,7 +619,6 @@ const tmSongs = [
   { title: "CRIMINAL LOVE", artist: "ENHYPEN", embed: "https://whyp.it/embeds/track/Uw6AILBHJzu7?preset=CwtNL6OcYsqs&showLink=false", cover: "criminal.jpe" }
 ];
 
-/* ELEMENTS AND PLAYBACK STATE */
 const tm = document.getElementById("tm-player");
 const tmTitle = document.getElementById("tm-title");
 const tmSubtitle = document.getElementById("tm-subtitle");
@@ -645,9 +649,6 @@ let tmStallChecker = null;
 let stallWarningShown = false;
 let tmParentViewport = { width: window.innerWidth, height: window.innerHeight };
 
-/* SEND THE PLAYER'S REAL SIZE TO THE TUMBLR PAGE.
-   The parent then resizes the iframe to fit the player, removing the oversized
-   invisible iframe area that used to restrict dragging. */
 let tmResizeQueued = false;
 function tmNotifyParentSize() {
   if (tmResizeQueued) return;
@@ -656,15 +657,16 @@ function tmNotifyParentSize() {
     tmResizeQueued = false;
     const visibleElement = tm.classList.contains("hidden") ? tmToggle : tm;
     const rect = visibleElement.getBoundingClientRect();
+    const extraSpace = 15;
+
     window.parent.postMessage({
       type: "tm-player-resize",
-      width: Math.ceil(rect.width),
-      height: Math.ceil(rect.height)
+      width: Math.ceil(rect.width + extraSpace * 2),
+      height: Math.ceil(rect.height + extraSpace * 2)
     }, "*");
   });
 }
 
-/* PLAYLIST HEIGHT IS LIMITED TO THE SPACE AVAILABLE ON THE TUMBLR WINDOW. */
 function tmUpdatePlaylistLimit() {
   if (!tmPlaylist.classList.contains("open")) {
     tmPlaylist.style.maxHeight = "150px";
@@ -981,8 +983,7 @@ tmToggle.addEventListener("click", () => {
   tmNotifyParentSize();
 });
 
-/* DRAG THE ACTUAL TUMBLR IFRAME.
-   The parent page receives movement deltas and moves the iframe itself. */
+/* DRAG THE ACTUAL TUMBLR IFRAME */
 const header = document.getElementById("tm-header");
 let dragging = false;
 let previousScreenX = 0;
@@ -1020,7 +1021,7 @@ header.addEventListener("pointerup", tmFinishDragging);
 header.addEventListener("pointercancel", tmFinishDragging);
 window.addEventListener("blur", tmFinishDragging);
 
-/* RECEIVE VIEWPORT SIZE FROM TUMBLR SO THE PLAYLIST CAN FIT THE SCREEN. */
+/* RECEIVE VIEWPORT SIZE FROM TUMBLR */
 window.addEventListener("message", event => {
   if (event.source !== window.parent || !event.data) return;
   if (event.data.type === "tm-parent-viewport") {
@@ -1032,7 +1033,7 @@ window.addEventListener("message", event => {
   }
 });
 
-/* KEEP THE PARENT'S IFRAME SIZE IN SYNC WITH THE PLAYER. */
+/* KEEP THE PARENT'S IFRAME SIZE IN SYNC */
 if ("ResizeObserver" in window) {
   const tmObserver = new ResizeObserver(tmNotifyParentSize);
   tmObserver.observe(tm);
