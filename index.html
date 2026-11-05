@@ -1,49 +1,33 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tumblr Vinyl Music Player</title>
-
 <script src="https://cdn.embed.ly/player-0.1.0.min.js"></script>
-
 <style>
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; width: 100%; min-height: 100%; overflow: hidden; }
+body { font-family: Arial, sans-serif; background: transparent; }
 
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-}
-
-/* MAIN PLAYER */
+/* The Tumblr-side iframe follows this player and is resized to its exact bounds. */
 #tm-player {
   position: fixed;
-  right: 20px;
-  bottom: 20px;
+  left: 0;
+  top: 0;
   width: 330px;
-  max-width: calc(100vw - 20px);
+  max-width: 100vw;
   padding: 16px;
   background: #101014;
-  color: #ffffff;
+  color: #fff;
   border: 1px solid #38383f;
   border-radius: 16px;
   box-shadow: 0 10px 35px rgba(0,0,0,.65);
   z-index: 999999;
-  transition: left .25s ease, top .25s ease;
 }
+#tm-player.tm-dragging { transition: none; }
+#tm-player.hidden { display: none; }
 
-#tm-player.tm-dragging {
-  transition: none;
-}
-
-#tm-player.hidden {
-  display: none;
-}
-
-/* HEADER */
 #tm-header {
   display: flex;
   justify-content: space-between;
@@ -53,559 +37,197 @@ body {
   touch-action: none;
   user-select: none;
 }
-
-#tm-header:active {
-  cursor: grabbing;
-}
-
-.tm-header-title {
-  font-size: 12px;
-  letter-spacing: 2px;
-  color: #ff0000;
-  font-weight: bold;
-}
-
-.tm-header-buttons {
-  display: flex;
-  gap: 6px;
-}
-
+#tm-header:active { cursor: grabbing; }
+.tm-header-title { font-size: 12px; letter-spacing: 2px; color: #f00; font-weight: bold; }
+.tm-header-buttons { display: flex; gap: 6px; }
 .tm-header-buttons button {
-  width: 25px;
-  height: 25px;
-  border: none;
-  border-radius: 6px;
-  background: #29292f;
-  color: white;
-  cursor: pointer;
-  font-size: 15px;
+  width: 25px; height: 25px; border: 0; border-radius: 6px;
+  background: #29292f; color: #fff; cursor: pointer; font-size: 15px;
 }
+.tm-header-buttons button:hover { background: #f00; }
 
-.tm-header-buttons button:hover {
-  background: #ff0000;
-}
-
-/* VINYL STAGE */
 #tm-artwork {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 5px 0 17px;
-  position: relative;
-  overflow: visible;
+  width: 100%; display: flex; align-items: center; justify-content: center;
+  padding: 5px 0 17px; position: relative; overflow: visible;
 }
-
-/* VINYL RECORD */
 #tm-vinyl {
-  width: 220px;
-  height: 220px;
-  max-width: 100%;
-  aspect-ratio: 1 / 1;
-  border-radius: 50%;
-  position: relative;
-  display: flex;
-  align-items: center;
+  width: 220px; height: 220px; max-width: 100%; aspect-ratio: 1 / 1;
+  border-radius: 50%; position: relative; display: flex; align-items: center;
   justify-content: center;
-
-  background:
-    repeating-radial-gradient(
-      circle at center,
-      #080808 0px,
-      #242428 2px,
-      #080808 4px,
-      #19191d 6px,
-      #080808 8px
-    );
-
+  background: repeating-radial-gradient(circle at center,
+    #080808 0px, #242428 2px, #080808 4px, #19191d 6px, #080808 8px);
   border: 5px solid #050505;
-  box-shadow:
-    0 8px 22px rgba(0,0,0,.7),
-    inset 0 0 0 2px #414149;
-
+  box-shadow: 0 8px 22px rgba(0,0,0,.7), inset 0 0 0 2px #414149;
   will-change: transform;
 }
-
 #tm-vinyl::before {
-  content: "";
-  position: absolute;
-  inset: 15px;
-  border-radius: 50%;
-  border: 1px solid rgba(255,255,255,.08);
-  pointer-events: none;
+  content: ""; position: absolute; inset: 15px; border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.08); pointer-events: none;
 }
-
 #tm-vinyl::after {
-  content: "";
-  position: absolute;
-  inset: 4px;
-  border-radius: 50%;
-  border: 1px solid rgba(255,255,255,.07);
-  pointer-events: none;
+  content: ""; position: absolute; inset: 4px; border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.07); pointer-events: none;
 }
-
-/* ALBUM LABEL */
 #tm-vinyl-label {
-  position: relative;
-  width: 94px;
-  height: 94px;
-  border-radius: 50%;
-  overflow: hidden;
-  background: #ff0000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 3px solid #080808;
-  z-index: 1;
+  position: relative; width: 94px; height: 94px; border-radius: 50%;
+  overflow: hidden; background: #f00; display: flex; align-items: center;
+  justify-content: center; border: 3px solid #080808; z-index: 1;
 }
-
-#tm-cover {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: none;
-}
-
-.tm-note {
-  font-size: 30px;
-  color: #ffffff;
-}
-
-/* CENTER SPINDLE */
+#tm-cover { width: 100%; height: 100%; object-fit: cover; display: none; }
+.tm-note { font-size: 30px; color: #fff; }
 #tm-vinyl-spindle {
-  position: absolute;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: #ffffff;
-  border: 2px solid #ff0000;
-  z-index: 3;
-  pointer-events: none;
+  position: absolute; width: 9px; height: 9px; border-radius: 50%;
+  background: #fff; border: 2px solid #f00; z-index: 3; pointer-events: none;
 }
-
-/* SILVER METALLIC TONEARM */
 #tm-tonearm-svg {
-  position: absolute;
-  top: -5px;
-  left: calc(58% - 1px);
-  width: 120px;
-  height: 150px;
-  overflow: visible;
-  z-index: 6;
-  pointer-events: none;
-  display: block;
+  position: absolute; top: -5px; left: calc(58% - 1px); width: 120px;
+  height: 150px; overflow: visible; z-index: 6; pointer-events: none; display: block;
 }
-
-/* ROTATION PIVOT */
 #tone-arm {
-  transform-box: view-box;
-  transform-origin: 92px 24px;
-  transform: rotate(-15deg);
-  transition: transform .6s cubic-bezier(.4, 0, .2, 1);
+  transform-box: view-box; transform-origin: 92px 24px; transform: rotate(-15deg);
+  transition: transform .6s cubic-bezier(.4,0,.2,1);
 }
+#tm-artwork.is-playing #tone-arm { transform: rotate(8deg); }
+#tm-player.minimized #tm-tonearm-svg { display: none; }
 
-#tm-artwork.is-playing #tone-arm {
-  transform: rotate(8deg);
-}
-
-/* HIDE NEEDLE WHEN MINIMIZED */
-#tm-player.minimized #tm-tonearm-svg {
-  display: none;
-}
-
-/* STATUS */
 #tm-status {
-  text-align: center;
-  font-size: 10px;
-  color: #777780;
-  margin-top: -8px;
-  margin-bottom: 12px;
-  letter-spacing: 1px;
+  text-align: center; font-size: 10px; color: #777780; margin-top: -8px;
+  margin-bottom: 12px; letter-spacing: 1px;
 }
-
-/* TRACK INFORMATION */
-#tm-track {
-  text-align: left;
-  margin-bottom: 15px;
-  min-width: 0;
-}
-
+#tm-track { text-align: left; margin-bottom: 15px; min-width: 0; }
 #tm-title {
-  font-size: 16px;
-  font-weight: bold;
-  margin-bottom: 5px;
-  color: #ff0000;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  font-size: 16px; font-weight: bold; margin-bottom: 5px; color: #f00;
+  overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
 }
-
-/* BRACKET TEXT / SONG VERSION */
 #tm-subtitle {
-  display: none;
-  font-size: 10px;
-  color: #777780;
-  margin-top: -2px;
-  margin-bottom: 5px;
-  letter-spacing: 0.5px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  display: none; font-size: 10px; color: #777780; margin-top: -2px;
+  margin-bottom: 5px; letter-spacing: .5px; overflow: hidden;
+  white-space: nowrap; text-overflow: ellipsis;
 }
+#tm-artist { font-size: 12px; color: #a5a5ad; }
 
-#tm-artist {
-  font-size: 12px;
-  color: #a5a5ad;
-}
-
-/* PROGRESS BAR */
 #tm-progress-wrap {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 10px;
-  color: #a5a5ad;
-  margin-bottom: 15px;
+  display: flex; align-items: center; gap: 8px; font-size: 10px;
+  color: #a5a5ad; margin-bottom: 15px;
 }
-
 #tm-progress {
-  flex: 1;
-  min-width: 0;
-  height: 3px;
-  appearance: none;
-  -webkit-appearance: none;
-  background: #414149;
-  border-radius: 10px;
-  outline: none;
-  cursor: pointer;
+  flex: 1; min-width: 0; height: 3px; appearance: none; -webkit-appearance: none;
+  background: #414149; border-radius: 10px; outline: none; cursor: pointer;
 }
-
 #tm-progress::-webkit-slider-thumb {
-  appearance: none;
-  -webkit-appearance: none;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #ff0000;
+  appearance: none; -webkit-appearance: none; width: 10px; height: 10px;
+  border-radius: 50%; background: #f00;
 }
-
 #tm-progress::-moz-range-thumb {
-  width: 10px;
-  height: 10px;
-  border: none;
-  border-radius: 50%;
-  background: #ff0000;
+  width: 10px; height: 10px; border: 0; border-radius: 50%; background: #f00;
 }
 
-/* PLAYBACK CONTROLS */
 #tm-controls {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 17px;
-  padding: 0 5px;
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 17px; padding: 0 5px;
 }
-
 #tm-controls button {
-  border: none;
-  background: transparent;
-  color: #ffffff;
-  cursor: pointer;
-  font-size: 18px;
-  width: 38px;
-  height: 38px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
+  border: 0; background: transparent; color: #fff; cursor: pointer;
+  font-size: 18px; width: 38px; height: 38px; display: flex;
+  align-items: center; justify-content: center; border-radius: 50%;
 }
-
-#tm-controls button:hover {
-  color: #ff0000;
-}
-
+#tm-controls button:hover { color: #f00; }
 #tm-controls #tm-play {
-  width: 47px;
-  height: 47px;
-  border-radius: 50%;
-  background: #ff0000;
-  color: #ffffff;
-  font-size: 19px;
+  width: 47px; height: 47px; border-radius: 50%; background: #f00;
+  color: #fff; font-size: 19px;
 }
+#tm-controls #tm-play:hover { background: #ff5360; }
+#tm-controls button.active { color: #f00; }
 
-#tm-controls #tm-play:hover {
-  background: #ff5360;
-}
-
-#tm-controls button.active {
-  color: #ff0000;
-}
-
-/* PLAYLIST AND VOLUME BUTTONS */
 #tm-tools {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-top: 1px solid #38383f;
-  padding-top: 12px;
+  display: flex; justify-content: space-between; align-items: center;
+  border-top: 1px solid #38383f; padding-top: 12px;
 }
-
 #tm-tools button {
-  background: transparent;
-  border: none;
-  color: #a5a5ad;
-  cursor: pointer;
-  font-size: 12px;
-  padding: 5px;
-  border-radius: 6px;
+  background: transparent; border: 0; color: #a5a5ad; cursor: pointer;
+  font-size: 12px; padding: 5px; border-radius: 6px;
 }
-
-#tm-tools button:hover,
-#tm-tools button.active {
-  color: #ffffff;
-  background: #29292f;
-}
-
+#tm-tools button:hover, #tm-tools button.active { color: #fff; background: #29292f; }
 .tm-tool-label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  letter-spacing: 1px;
-  font-size: 10px;
+  display: flex; align-items: center; gap: 6px; letter-spacing: 1px; font-size: 10px;
 }
 
-/* PLAYLIST DROPDOWN */
 #tm-playlist {
-  display: none;
-  border-top: 1px solid #38383f;
-  margin-top: 10px;
-  padding-top: 8px;
-  max-height: 150px;
-  overflow-y: auto;
+  display: none; border-top: 1px solid #38383f; margin-top: 10px;
+  padding-top: 8px; max-height: 150px; overflow-y: auto; overscroll-behavior: contain;
 }
-
-#tm-playlist.open {
-  display: block;
-}
-
+#tm-playlist.open { display: block; }
 .tm-song {
-  width: 100%;
-  padding: 9px;
-  border: none;
-  border-radius: 7px;
-  background: transparent;
-  color: #ffffff;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  text-align: left;
-  font-size: 12px;
+  width: 100%; padding: 9px; border: 0; border-radius: 7px;
+  background: transparent; color: #fff; cursor: pointer; display: flex;
+  align-items: center; justify-content: space-between; gap: 8px;
+  text-align: left; font-size: 12px;
 }
-
-.tm-song:hover {
-  background: #29292f;
-}
-
-.tm-song.active {
-  background: #3b171c;
-  color: #ff6b75;
-}
-
-.tm-song-info {
-  min-width: 0;
-}
-
+.tm-song:hover { background: #29292f; }
+.tm-song.active { background: #3b171c; color: #ff6b75; }
+.tm-song-info { min-width: 0; }
 .tm-song-title {
-  display: block;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
 }
+.tm-song-artist { display: block; color: #a5a5ad; font-size: 10px; margin-top: 3px; }
+.tm-song-playing { color: #f00; flex-shrink: 0; }
 
-.tm-song-artist {
-  display: block;
-  color: #a5a5ad;
-  font-size: 10px;
-  margin-top: 3px;
-}
-
-.tm-song-playing {
-  color: #ff0000;
-  flex-shrink: 0;
-}
-
-/* VOLUME DROPDOWN */
 #tm-volume-panel {
-  display: none;
-  align-items: center;
-  gap: 10px;
-  border-top: 1px solid #38383f;
-  padding: 12px 5px 3px;
-  margin-top: 10px;
-  color: #a5a5ad;
-  font-size: 13px;
+  display: none; align-items: center; gap: 10px; border-top: 1px solid #38383f;
+  padding: 12px 5px 3px; margin-top: 10px; color: #a5a5ad; font-size: 13px;
 }
+#tm-volume-panel.open { display: flex; }
+#tm-volume { flex: 1; min-width: 0; accent-color: #f00; cursor: pointer; }
 
-#tm-volume-panel.open {
-  display: flex;
-}
-
-#tm-volume {
-  flex: 1;
-  min-width: 0;
-  accent-color: #ff0000;
-  cursor: pointer;
-}
-
-/* REOPEN BUTTON */
 #tm-player-toggle {
-  display: none;
-  position: fixed;
-  right: 20px;
-  bottom: 20px;
-  z-index: 999998;
-  border: none;
-  border-radius: 50%;
-  width: 45px;
-  height: 45px;
-  background: #ff0000;
-  color: #ffffff;
-  font-size: 20px;
-  cursor: pointer;
+  display: none; position: fixed; left: 0; top: 0; z-index: 999998;
+  border: 0; border-radius: 50%; width: 45px; height: 45px;
+  background: #f00; color: #fff; font-size: 20px; cursor: pointer;
 }
+#tm-player-toggle.visible { display: block; }
+#tm-player-toggle:hover { background: #ff5360; }
 
-#tm-player-toggle.visible {
-  display: block;
-}
-
-#tm-player-toggle:hover {
-  background: #ff5360;
-}
-
-/* MINIMIZED PLAYER */
-#tm-player.minimized {
-  width: 270px;
-  padding: 12px;
-}
-
-#tm-player.minimized #tm-header {
-  margin-bottom: 10px;
-}
-
+#tm-player.minimized { width: 270px; padding: 12px; }
+#tm-player.minimized #tm-header { margin-bottom: 10px; }
 #tm-player.minimized #tm-content {
-  display: grid;
-  grid-template-columns: 64px minmax(0, 1fr);
-  align-items: center;
-  gap: 10px;
+  display: grid; grid-template-columns: 64px minmax(0,1fr);
+  align-items: center; gap: 10px;
 }
-
 #tm-player.minimized #tm-artwork {
-  width: 64px;
-  height: 64px;
-  padding: 0;
-  margin: 0;
-  grid-column: 1;
-  grid-row: 1;
+  width: 64px; height: 64px; padding: 0; margin: 0; grid-column: 1; grid-row: 1;
 }
-
-#tm-player.minimized #tm-vinyl {
-  width: 64px;
-  height: 64px;
-  border-width: 2px;
-}
-
-#tm-player.minimized #tm-vinyl-label {
-  width: 28px;
-  height: 28px;
-  border-width: 1px;
-}
-
-#tm-player.minimized .tm-note {
-  font-size: 12px;
-}
-
-#tm-player.minimized #tm-vinyl-spindle {
-  width: 5px;
-  height: 5px;
-  border-width: 1px;
-}
-
-#tm-player.minimized #tm-vinyl::before {
-  inset: 5px;
-}
-
-#tm-player.minimized #tm-vinyl::after {
-  inset: 2px;
-}
-
-#tm-player.minimized #tm-track {
-  grid-column: 2;
-  grid-row: 1;
-  margin: 0;
-  min-width: 0;
-}
-
-#tm-player.minimized #tm-title {
-  font-size: 13px;
-}
-
-#tm-player.minimized #tm-subtitle {
-  font-size: 9px;
-  margin-bottom: 3px;
-}
-
-#tm-player.minimized #tm-artist {
-  font-size: 11px;
-}
-
+#tm-player.minimized #tm-vinyl { width: 64px; height: 64px; border-width: 2px; }
+#tm-player.minimized #tm-vinyl-label { width: 28px; height: 28px; border-width: 1px; }
+#tm-player.minimized .tm-note { font-size: 12px; }
+#tm-player.minimized #tm-vinyl-spindle { width: 5px; height: 5px; border-width: 1px; }
+#tm-player.minimized #tm-vinyl::before { inset: 5px; }
+#tm-player.minimized #tm-vinyl::after { inset: 2px; }
+#tm-player.minimized #tm-track { grid-column: 2; grid-row: 1; margin: 0; min-width: 0; }
+#tm-player.minimized #tm-title { font-size: 13px; }
+#tm-player.minimized #tm-subtitle { font-size: 9px; margin-bottom: 3px; }
+#tm-player.minimized #tm-artist { font-size: 11px; }
 #tm-player.minimized #tm-progress-wrap,
 #tm-player.minimized #tm-controls,
 #tm-player.minimized #tm-tools,
 #tm-player.minimized #tm-playlist,
 #tm-player.minimized #tm-volume-panel,
-#tm-player.minimized #tm-status {
-  display: none !important;
-}
+#tm-player.minimized #tm-status { display: none !important; }
 
-/* PLAYLIST SCROLLBAR */
-#tm-playlist::-webkit-scrollbar {
-  width: 5px;
-}
+#tm-playlist::-webkit-scrollbar { width: 5px; }
+#tm-playlist::-webkit-scrollbar-track { background: #101014; }
+#tm-playlist::-webkit-scrollbar-thumb { background: #f00; border-radius: 10px; }
 
-#tm-playlist::-webkit-scrollbar-track {
-  background: #101014;
-}
-
-#tm-playlist::-webkit-scrollbar-thumb {
-  background: #ff0000;
-  border-radius: 10px;
-}
-
-/* HIDDEN WHYP PLAYER */
 #tm-whyp-host {
-  position: fixed;
-  left: -10000px;
-  top: 0;
-  width: 330px;
-  height: 200px;
-  overflow: hidden;
-  opacity: 0;
-  pointer-events: none;
-  z-index: -1;
+  position: fixed; left: -10000px; top: 0; width: 330px; height: 200px;
+  overflow: hidden; opacity: 0; pointer-events: none; z-index: -1;
 }
 </style>
 </head>
-
 <body>
 
 <div id="tm-player">
-
-  <!-- HEADER -->
   <div id="tm-header">
     <div class="tm-header-title">NOW PLAYING ♫</div>
-
     <div class="tm-header-buttons">
       <button id="tm-minimize" title="Minimize">−</button>
       <button id="tm-hide" title="Hide">×</button>
@@ -613,29 +235,17 @@ body {
   </div>
 
   <div id="tm-content">
-
-    <!-- VINYL AND TONEARM -->
     <div id="tm-artwork">
-
       <div id="tm-vinyl">
         <div id="tm-vinyl-label">
           <img id="tm-cover" alt="Album artwork">
           <div class="tm-note">♫</div>
         </div>
-
         <div id="tm-vinyl-spindle"></div>
       </div>
 
-      <!-- SILVER METALLIC TONEARM -->
-      <svg
-        id="tm-tonearm-svg"
-        width="120"
-        height="150"
-        viewBox="0 0 120 150"
-        xmlns="http://www.w3.org/2000/svg"
-      >
+      <svg id="tm-tonearm-svg" width="120" height="150" viewBox="0 0 120 150" xmlns="http://www.w3.org/2000/svg">
         <defs>
-
           <linearGradient id="silver-metal" x1="0" y1="0" x2="1" y2="0">
             <stop offset="0%" stop-color="#77777d"/>
             <stop offset="25%" stop-color="#eeeeF2"/>
@@ -643,111 +253,41 @@ body {
             <stop offset="75%" stop-color="#f5f5f7"/>
             <stop offset="100%" stop-color="#77777d"/>
           </linearGradient>
-
           <linearGradient id="silver-weight" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0%" stop-color="#f4f4f4"/>
             <stop offset="45%" stop-color="#aeb0b7"/>
             <stop offset="100%" stop-color="#66666d"/>
           </linearGradient>
-
           <filter id="tonearm-shadow" x="-30%" y="-30%" width="160%" height="160%">
-            <feDropShadow
-              dx="1"
-              dy="2"
-              stdDeviation="1.5"
-              flood-opacity="0.35"
-            />
+            <feDropShadow dx="1" dy="2" stdDeviation="1.5" flood-opacity="0.35"/>
           </filter>
-
         </defs>
-
         <g id="tone-arm">
-
-          <circle
-            cx="92"
-            cy="24"
-            r="14"
-            fill="url(#silver-weight)"
-            stroke="#55555b"
-            stroke-width="1"
-            filter="url(#tonearm-shadow)"
-          />
-
-          <circle
-            cx="92"
-            cy="24"
-            r="10"
-            fill="none"
-            stroke="#eeeeee"
-            stroke-width="1"
-            opacity="0.6"
-          />
-
-          <circle
-            cx="92"
-            cy="24"
-            r="3"
-            fill="#66666d"
-          />
-
-          <line
-            x1="92"
-            y1="32"
-            x2="72"
-            y2="114"
-            stroke="url(#silver-metal)"
-            stroke-width="5"
-            stroke-linecap="round"
-            filter="url(#tonearm-shadow)"
-          />
-
+          <circle cx="92" cy="24" r="14" fill="url(#silver-weight)" stroke="#55555b" stroke-width="1" filter="url(#tonearm-shadow)"/>
+          <circle cx="92" cy="24" r="10" fill="none" stroke="#eeeeee" stroke-width="1" opacity="0.6"/>
+          <circle cx="92" cy="24" r="3" fill="#66666d"/>
+          <line x1="92" y1="32" x2="72" y2="114" stroke="url(#silver-metal)" stroke-width="5" stroke-linecap="round" filter="url(#tonearm-shadow)"/>
           <g transform="translate(68, 106) rotate(-18)">
-
-            <rect
-              x="0"
-              y="0"
-              width="11"
-              height="22"
-              rx="2"
-              fill="url(#silver-metal)"
-              stroke="#66666d"
-              stroke-width="0.7"
-            />
-
-            <rect
-              x="1"
-              y="16"
-              width="9"
-              height="6"
-              rx="1"
-              fill="#d71932"
-            />
-
+            <rect x="0" y="0" width="11" height="22" rx="2" fill="url(#silver-metal)" stroke="#66666d" stroke-width="0.7"/>
+            <rect x="1" y="16" width="9" height="6" rx="1" fill="#d71932"/>
           </g>
-
         </g>
       </svg>
-
     </div>
 
-    <!-- STATUS: NOW UNDER THE VINYL -->
     <div id="tm-status">Ready</div>
-
-    <!-- TRACK INFO -->
     <div id="tm-track">
       <div id="tm-title">Loading...</div>
       <div id="tm-subtitle"></div>
       <div id="tm-artist"></div>
     </div>
 
-    <!-- PROGRESS -->
     <div id="tm-progress-wrap">
       <span id="tm-current">0:00</span>
       <input type="range" id="tm-progress" min="0" max="100" value="0">
       <span id="tm-duration">0:00</span>
     </div>
 
-    <!-- PLAYBACK BUTTONS -->
     <div id="tm-controls">
       <button id="tm-shuffle" title="Shuffle">⤨</button>
       <button id="tm-prev" title="Previous">|◀</button>
@@ -756,109 +296,43 @@ body {
       <button id="tm-loop" title="Repeat">↻</button>
     </div>
 
-    <!-- PLAYLIST AND VOLUME BUTTONS -->
     <div id="tm-tools">
       <button id="tm-playlist-toggle" class="tm-tool-label" title="Open playlist">
-        <span>☷</span>
-        <span>PLAYLIST</span>
+        <span>☷</span><span>PLAYLIST</span>
       </button>
-
       <button id="tm-volume-toggle" class="tm-tool-label" title="Volume">
-        <span id="tm-volume-icon">♫</span>
-        <span>VOLUME</span>
+        <span id="tm-volume-icon">♫</span><span>VOLUME</span>
       </button>
     </div>
 
-    <!-- PLAYLIST DROPDOWN -->
     <div id="tm-playlist"></div>
 
-    <!-- VOLUME SLIDER -->
     <div id="tm-volume-panel">
       <span id="tm-volume-icon-label">♫</span>
       <input type="range" id="tm-volume" min="0" max="100" value="70">
     </div>
-
   </div>
 </div>
 
 <button id="tm-player-toggle">♫</button>
-
 <div id="tm-whyp-host"></div>
 
 <script>
-
-/* PLAYLIST */
+/* SONG LIST — kept exactly as supplied */
 const tmSongs = [
-  {
-    title: "Roxanne [Slowed]",
-    artist: "Arizona Zervas",
-    embed: "https://whyp.it/embeds/track/3GZ75tAEUhsB?preset=CwtNL6OcYsqs&showLink=false",
-    cover: "roxanne.jpg"
-  },
-  {
-    title: "RUN!",
-    artist: "Odetari, Lay Bankz",
-    embed: "https://whyp.it/embeds/track/aMCMtvU080Dp?preset=CwtNL6OcYsqs&showLink=false",
-    cover: "run.jpg"
-  },
-  {
-    title: "Jealous Type",
-    artist: "Doja Cat",
-    embed: "https://whyp.it/embeds/track/aziEBeNCodse?preset=CwtNL6OcYsqs&showLink=false",
-    cover: "jealos.jpe"
-  },
-  {
-    title: "Scanty and Kneesocks Theme [Metal Cover]",
-    artist: "TeddyLoid",
-    embed: "https://whyp.it/embeds/track/FVasAQxIBM2F?preset=CwtNL6OcYsqs&showLink=false",
-    cover: "scanty.jpg"
-  },
-  {
-    title: "Nisekao",
-    artist: "yama",
-    embed: "https://whyp.it/embeds/track/B1QvYGoUypbh?preset=CwtNL6OcYsqs&showLink=false",
-    cover: "nisekao.jpg"
-  },
-  {
-    title: "Loveit? [Dasu Cover]",
-    artist: "biz×ZERA, LOLUET",
-    embed: "https://whyp.it/embeds/track/Uq0gdOLlMyyr?preset=CwtNL6OcYsqs&showLink=false",
-    cover: "loveit.jpe"
-  },
-  {
-    title: "FIRESTARTER",
-    artist: "K/DA",
-    embed: "https://whyp.it/embeds/track/CP8R7MinRHbO?preset=CwtNL6OcYsqs&showLink=false",
-    cover: "kda.jpe"
-  },
-  {
-    title: "WOKE UP",
-    artist: "XG",
-    embed: "https://whyp.it/embeds/track/usq9dhUCp42D?preset=CwtNL6OcYsqs&showLink=false",
-    cover: "xg.jpe"
-  },
-  {
-    title: "FaSHioN",
-    artist: "Cortis",
-    embed: "https://whyp.it/embeds/track/inaVvCSN09cm?preset=CwtNL6OcYsqs&showLink=false",
-    cover: "fashion.png"
-  },
-  {
-    title: "No Doubt",
-    artist: "ENHYPEN",
-    embed: "https://whyp.it/embeds/track/WR0zkrPiHVCr?preset=CwtNL6OcYsqs",
-    cover: "doubt.jpe"
-  },
-  {
-    title: "CRIMINAL LOVE",
-    artist: "ENHYPEN",
-    embed: "https://whyp.it/embeds/track/Uw6AILBHJzu7?preset=CwtNL6OcYsqs&showLink=false",
-    cover: "criminal.jpe"
-  }
+  { title: "Roxanne [Slowed]", artist: "Arizona Zervas", embed: "https://whyp.it/embeds/track/3GZ75tAEUhsB?preset=CwtNL6OcYsqs&showLink=false", cover: "roxanne.jpg" },
+  { title: "Jealous Type", artist: "Doja Cat", embed: "https://whyp.it/embeds/track/aziEBeNCodse?preset=CwtNL6OcYsqs&showLink=false", cover: "jealos.jpe" },
+  { title: "Scanty and Kneesocks Theme [Metal Cover]", artist: "TeddyLoid", embed: "https://whyp.it/embeds/track/FVasAQxIBM2F?preset=CwtNL6OcYsqs&showLink=false", cover: "scanty.jpg" },
+  { title: "Nisekao", artist: "yama", embed: "https://whyp.it/embeds/track/B1QvYGoUypbh?preset=CwtNL6OcYsqs&showLink=false", cover: "nisekao.jpg" },
+  { title: "Loveit? [Dasu Cover]", artist: "biz×ZERA, LOLUET", embed: "https://whyp.it/embeds/track/Uq0gdOLlMyyr?preset=CwtNL6OcYsqs&showLink=false", cover: "loveit.jpe" },
+  { title: "FIRESTARTER", artist: "K/DA", embed: "https://whyp.it/embeds/track/CP8R7MinRHbO?preset=CwtNL6OcYsqs&showLink=false", cover: "kda.jpe" },
+  { title: "WOKE UP", artist: "XG", embed: "https://whyp.it/embeds/track/usq9dhUCp42D?preset=CwtNL6OcYsqs&showLink=false", cover: "xg.jpe" },
+  { title: "FaSHioN", artist: "Cortis", embed: "https://whyp.it/embeds/track/inaVvCSN09cm?preset=CwtNL6OcYsqs&showLink=false", cover: "fashion.png" },
+  { title: "No Doubt", artist: "ENHYPEN", embed: "https://whyp.it/embeds/track/WR0zkrPiHVCr?preset=CwtNL6OcYsqs", cover: "doubt.jpe" },
+  { title: "CRIMINAL LOVE", artist: "ENHYPEN", embed: "https://whyp.it/embeds/track/Uw6AILBHJzu7?preset=CwtNL6OcYsqs&showLink=false", cover: "criminal.jpe" }
 ];
 
-
-/* ELEMENTS */
+/* ELEMENTS AND PLAYBACK STATE */
 const tm = document.getElementById("tm-player");
 const tmTitle = document.getElementById("tm-title");
 const tmSubtitle = document.getElementById("tm-subtitle");
@@ -874,19 +348,57 @@ const tmCover = document.getElementById("tm-cover");
 const tmNote = document.querySelector("#tm-vinyl-label .tm-note");
 const tmVinyl = document.getElementById("tm-vinyl");
 const tmArtwork = document.getElementById("tm-artwork");
+const tmToggle = document.getElementById("tm-player-toggle");
 
 let currentSong = 0;
 let whypFrame = null;
 let whypPlayer = null;
-
 let isPlaying = false;
 let isShuffle = false;
 let isLoop = false;
 let isSeeking = false;
-
 let knownDuration = 0;
 let lastTimeUpdate = Date.now();
 let tmStallChecker = null;
+let stallWarningShown = false;
+let tmParentViewport = { width: window.innerWidth, height: window.innerHeight };
+
+/* SEND THE PLAYER'S REAL SIZE TO THE TUMBLR PAGE.
+   The parent then resizes the iframe to fit the player, removing the oversized
+   invisible iframe area that used to restrict dragging. */
+let tmResizeQueued = false;
+function tmNotifyParentSize() {
+  if (tmResizeQueued) return;
+  tmResizeQueued = true;
+  requestAnimationFrame(() => {
+    tmResizeQueued = false;
+    const visibleElement = tm.classList.contains("hidden") ? tmToggle : tm;
+    const rect = visibleElement.getBoundingClientRect();
+    window.parent.postMessage({
+      type: "tm-player-resize",
+      width: Math.ceil(rect.width),
+      height: Math.ceil(rect.height)
+    }, "*");
+  });
+}
+
+/* PLAYLIST HEIGHT IS LIMITED TO THE SPACE AVAILABLE ON THE TUMBLR WINDOW. */
+function tmUpdatePlaylistLimit() {
+  if (!tmPlaylist.classList.contains("open")) {
+    tmPlaylist.style.maxHeight = "150px";
+    tmNotifyParentSize();
+    return;
+  }
+
+  tmPlaylist.classList.remove("open");
+  const collapsedHeight = tm.getBoundingClientRect().height;
+  tmPlaylist.classList.add("open");
+
+  const available = tmParentViewport.height - collapsedHeight - 40;
+  const maxHeight = Math.max(50, Math.min(150, available));
+  tmPlaylist.style.maxHeight = maxHeight + "px";
+  tmNotifyParentSize();
+}
 
 /* VINYL ROTATION */
 let tmVinylAngle = 0;
@@ -895,105 +407,44 @@ let tmAnimationFrame = null;
 
 function tmSpinFrame(timestamp) {
   if (!isPlaying) return;
-
   if (tmLastFrame !== null) {
     const elapsed = timestamp - tmLastFrame;
     tmVinylAngle = (tmVinylAngle + elapsed * 0.09) % 360;
   }
-
   tmLastFrame = timestamp;
   tmVinyl.style.transform = `rotate(${tmVinylAngle}deg)`;
-
   tmAnimationFrame = requestAnimationFrame(tmSpinFrame);
 }
 
-
-/* PLAYBACK STATE AND TONEARM */
 function tmSetPlaying(playing) {
   isPlaying = playing;
-
   if (playing) {
     tmLastFrame = null;
-
     cancelAnimationFrame(tmAnimationFrame);
     tmAnimationFrame = requestAnimationFrame(tmSpinFrame);
-
   } else {
     cancelAnimationFrame(tmAnimationFrame);
-
     tmAnimationFrame = null;
     tmLastFrame = null;
-
     tmVinyl.style.transform = `rotate(${tmVinylAngle}deg)`;
   }
-
   tmArtwork.classList.toggle("is-playing", playing);
-
   tmPlay.textContent = playing ? "Ⅱ" : "▶";
   tmPlay.title = playing ? "Pause" : "Play";
 }
 
-
-/* TIME FORMAT */
 function tmFormatTime(seconds) {
   if (!Number.isFinite(seconds)) return "0:00";
-
   const minutes = Math.floor(seconds / 60);
   const remaining = Math.floor(seconds % 60);
-
   return minutes + ":" + String(remaining).padStart(2, "0");
 }
-
-
-/* SNAP TO NEAREST CORNER */
-function tmSnapToCorner() {
-  if (tm.classList.contains("hidden")) return;
-
-  const rect = tm.getBoundingClientRect();
-  const margin = 15;
-
-  const positions = [
-    { left: margin, top: margin },
-    { left: window.innerWidth - rect.width - margin, top: margin },
-    { left: margin, top: window.innerHeight - rect.height - margin },
-    {
-      left: window.innerWidth - rect.width - margin,
-      top: window.innerHeight - rect.height - margin
-    }
-  ];
-
-  let nearest = positions[0];
-  let shortestDistance = Infinity;
-
-  positions.forEach(position => {
-    const dx = rect.left - position.left;
-    const dy = rect.top - position.top;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-
-    if (distance < shortestDistance) {
-      shortestDistance = distance;
-      nearest = position;
-    }
-  });
-
-  const maxLeft = Math.max(margin, window.innerWidth - rect.width - margin);
-  const maxTop = Math.max(margin, window.innerHeight - rect.height - margin);
-
-  tm.style.left = Math.max(margin, Math.min(nearest.left, maxLeft)) + "px";
-  tm.style.top = Math.max(margin, Math.min(nearest.top, maxTop)) + "px";
-
-  tm.style.right = "auto";
-  tm.style.bottom = "auto";
-}
-
 
 /* RENDER PLAYLIST */
 function tmRenderPlaylist() {
   tmPlaylist.innerHTML = "";
-
   tmSongs.forEach((song, index) => {
     const item = document.createElement("button");
-
     item.type = "button";
     item.className = "tm-song" + (index === currentSong ? " active" : "");
 
@@ -1013,41 +464,28 @@ function tmRenderPlaylist() {
 
     const playingMark = document.createElement("span");
     playingMark.className = "tm-song-playing";
-    playingMark.textContent =
-      index === currentSong && isPlaying ? "♫" : "";
+    playingMark.textContent = index === currentSong && isPlaying ? "♫" : "";
 
     item.appendChild(info);
     item.appendChild(playingMark);
-
-    item.addEventListener("click", () => {
-      tmLoadSong(index, true);
-    });
-
+    item.addEventListener("click", () => tmLoadSong(index, true));
     tmPlaylist.appendChild(item);
   });
 }
 
-
 /* LOAD SONG */
 function tmLoadSong(index, autoplay = false) {
   currentSong = (index + tmSongs.length) % tmSongs.length;
-
   const song = tmSongs[currentSong];
 
   tmSetPlaying(false);
+  stallWarningShown = false;
 
-  /* SEPARATE TITLE AND BRACKET TEXT */
   const bracketText = song.title.match(/\[([^\]]+)\]/g);
-
-  tmTitle.textContent = song.title
-    .replace(/\s*\[[^\]]+\]/g, "")
-    .trim();
+  tmTitle.textContent = song.title.replace(/\s*\[[^\]]+\]/g, "").trim();
 
   if (bracketText) {
-    tmSubtitle.textContent = bracketText
-      .map(text => text.replace(/[\[\]]/g, ""))
-      .join(" • ");
-
+    tmSubtitle.textContent = bracketText.map(text => text.replace(/[\[\]]/g, "")).join(" • ");
     tmSubtitle.style.display = "block";
   } else {
     tmSubtitle.textContent = "";
@@ -1055,25 +493,16 @@ function tmLoadSong(index, autoplay = false) {
   }
 
   tmArtist.textContent = song.artist;
-
-  tmStatus.textContent = autoplay
-    ? "Loading next track..."
-    : "Loading track...";
-
+  tmStatus.textContent = autoplay ? "Loading next track..." : "Loading track...";
   tmProgress.value = 0;
   tmCurrent.textContent = "0:00";
   tmDuration.textContent = "0:00";
-
   knownDuration = 0;
   lastTimeUpdate = Date.now();
 
-  if (tmStallChecker) {
-    clearInterval(tmStallChecker);
-  }
-
+  if (tmStallChecker) clearInterval(tmStallChecker);
   tmStallChecker = null;
 
-  /* RESET ALBUM ART */
   tmCover.style.display = "none";
   tmNote.style.display = "block";
 
@@ -1082,39 +511,31 @@ function tmLoadSong(index, autoplay = false) {
       tmCover.style.display = "block";
       tmNote.style.display = "none";
     };
-
     tmCover.onerror = () => {
       tmCover.style.display = "none";
       tmNote.style.display = "block";
     };
-
     tmCover.src = song.cover;
-
   } else {
     tmCover.removeAttribute("src");
   }
 
   tmRenderPlaylist();
 
-  /* REMOVE PREVIOUS PLAYER */
   if (whypFrame) {
     whypFrame.remove();
     whypFrame = null;
     whypPlayer = null;
   }
 
-  /* CREATE NEW WHYP IFRAME */
   whypFrame = document.createElement("iframe");
-
   whypFrame.id = "tm-whyp-frame";
   whypFrame.src = song.embed;
   whypFrame.width = "330";
   whypFrame.height = "200";
-
   whypFrame.setAttribute("scrolling", "no");
   whypFrame.setAttribute("frameborder", "0");
   whypFrame.setAttribute("allow", "autoplay");
-
   document.getElementById("tm-whyp-host").appendChild(whypFrame);
 
   if (typeof playerjs === "undefined") {
@@ -1125,12 +546,9 @@ function tmLoadSong(index, autoplay = false) {
   const thisPlayer = new playerjs.Player(whypFrame);
   whypPlayer = thisPlayer;
 
-  /* PLAYER READY */
   thisPlayer.on("ready", () => {
     if (whypPlayer !== thisPlayer) return;
-
     thisPlayer.setVolume(Number(tmVolume.value) / 100);
-
     if (autoplay) {
       tmStatus.textContent = "Starting playback...";
       thisPlayer.play();
@@ -1139,307 +557,212 @@ function tmLoadSong(index, autoplay = false) {
     }
   });
 
-  /* PLAY EVENT */
   thisPlayer.on("play", () => {
     if (whypPlayer !== thisPlayer) return;
-
+    lastTimeUpdate = Date.now();
+    stallWarningShown = false;
     tmSetPlaying(true);
     tmStatus.textContent = "Playing!";
-
     tmRenderPlaylist();
   });
 
-  /* PAUSE EVENT */
   thisPlayer.on("pause", () => {
     if (whypPlayer !== thisPlayer) return;
-
     tmSetPlaying(false);
     tmStatus.textContent = "Paused.";
-
     tmRenderPlaylist();
   });
 
-  /* TIME UPDATE */
   thisPlayer.on("timeupdate", data => {
     if (whypPlayer !== thisPlayer || !data) return;
-
     lastTimeUpdate = Date.now();
+    stallWarningShown = false;
+    if (tmStatus.textContent === "Playback may be buffering...") tmStatus.textContent = "Playing!";
 
     const current = Number(data.seconds) || 0;
     const duration = Number(data.duration) || 0;
-
-    if (duration > 0) {
-      knownDuration = duration;
-    }
+    if (duration > 0) knownDuration = duration;
 
     if (!isSeeking && knownDuration > 0) {
       tmProgress.value = (current / knownDuration) * 100;
     }
-
     tmCurrent.textContent = tmFormatTime(current);
     tmDuration.textContent = tmFormatTime(knownDuration);
   });
 
-  /* DETECT STALLED PLAYBACK */
   tmStallChecker = setInterval(() => {
-    if (
-      whypPlayer === thisPlayer &&
-      isPlaying &&
-      Date.now() - lastTimeUpdate > 10000
-    ) {
-      tmSetPlaying(false);
-      tmStatus.textContent = "Playback stalled. Try pressing Play.";
-      tmRenderPlaylist();
+    if (whypPlayer === thisPlayer && isPlaying && !stallWarningShown &&
+        Date.now() - lastTimeUpdate > 15000) {
+      stallWarningShown = true;
+      tmStatus.textContent = "Playback may be buffering...";
     }
   }, 2000);
 
-  /* WHEN SONG ENDS */
   thisPlayer.on("ended", () => {
     if (whypPlayer !== thisPlayer) return;
-
-    if (isLoop) {
-      tmLoadSong(currentSong, true);
-    } else {
-      tmNextSong();
-    }
+    if (isLoop) tmLoadSong(currentSong, true);
+    else tmNextSong();
   });
 
-  /* PLAYBACK ERROR */
   thisPlayer.on("error", () => {
     if (whypPlayer !== thisPlayer) return;
-
     tmSetPlaying(false);
     tmStatus.textContent = "Playback error. Check the Whyp track.";
   });
 }
 
-
-/* PLAY / PAUSE */
-function tmPlaySong() {
-  if (whypPlayer) {
-    whypPlayer.play();
-  }
-}
-
-function tmPauseSong() {
-  if (whypPlayer) {
-    whypPlayer.pause();
-  }
-}
+/* PLAYBACK CONTROLS */
+function tmPlaySong() { if (whypPlayer) whypPlayer.play(); }
+function tmPauseSong() { if (whypPlayer) whypPlayer.pause(); }
 
 tmPlay.addEventListener("click", () => {
-  if (isPlaying) {
-    tmPauseSong();
-  } else {
-    tmPlaySong();
-  }
+  if (isPlaying) tmPauseSong();
+  else tmPlaySong();
 });
 
-
-/* NEXT SONG */
 function tmNextSong() {
   if (isShuffle && tmSongs.length > 1) {
     let next;
-
-    do {
-      next = Math.floor(Math.random() * tmSongs.length);
-    } while (next === currentSong);
-
+    do { next = Math.floor(Math.random() * tmSongs.length); }
+    while (next === currentSong);
     tmLoadSong(next, true);
-
   } else {
     tmLoadSong(currentSong + 1, true);
   }
 }
-
-
-/* PREVIOUS SONG */
-function tmPreviousSong() {
-  tmLoadSong(currentSong - 1, true);
-}
-
+function tmPreviousSong() { tmLoadSong(currentSong - 1, true); }
 document.getElementById("tm-next").addEventListener("click", tmNextSong);
 document.getElementById("tm-prev").addEventListener("click", tmPreviousSong);
 
-
-/* SHUFFLE */
 document.getElementById("tm-shuffle").addEventListener("click", function() {
   isShuffle = !isShuffle;
   this.classList.toggle("active", isShuffle);
 });
 
-
-/* REPEAT */
 document.getElementById("tm-loop").addEventListener("click", function() {
   isLoop = !isLoop;
   this.classList.toggle("active", isLoop);
 });
 
-
-/* PLAYLIST TOGGLE */
+/* DROPDOWNS */
 document.getElementById("tm-playlist-toggle").addEventListener("click", function() {
   const isOpen = tmPlaylist.classList.toggle("open");
-
   this.classList.toggle("active", isOpen);
-
-  setTimeout(tmSnapToCorner, 60);
+  tmUpdatePlaylistLimit();
 });
 
-
-/* VOLUME TOGGLE */
 document.getElementById("tm-volume-toggle").addEventListener("click", function() {
-  const volumePanel = document.getElementById("tm-volume-panel");
-  const isOpen = volumePanel.classList.toggle("open");
-
+  const panel = document.getElementById("tm-volume-panel");
+  const isOpen = panel.classList.toggle("open");
   this.classList.toggle("active", isOpen);
-
-  setTimeout(tmSnapToCorner, 60);
+  tmNotifyParentSize();
 });
 
-
-/* VOLUME SLIDER */
 tmVolume.addEventListener("input", () => {
   const volume = Number(tmVolume.value);
-
-  if (whypPlayer) {
-    whypPlayer.setVolume(volume / 100);
-  }
-
-  const volumeIcon = document.getElementById("tm-volume-icon");
-
-  if (volume === 0) {
-    volumeIcon.textContent = "×";
-  } else {
-    volumeIcon.textContent = "♫";
-  }
+  if (whypPlayer) whypPlayer.setVolume(volume / 100);
+  document.getElementById("tm-volume-icon").textContent = volume === 0 ? "×" : "♫";
 });
 
-
-/* SEEK / PROGRESS BAR */
+/* SEEK BAR */
 tmProgress.addEventListener("input", () => {
   isSeeking = true;
-
   if (knownDuration > 0) {
-    const previewTime =
-      (Number(tmProgress.value) / 100) * knownDuration;
-
+    const previewTime = (Number(tmProgress.value) / 100) * knownDuration;
     tmCurrent.textContent = tmFormatTime(previewTime);
   }
 });
-
 tmProgress.addEventListener("change", () => {
   if (whypPlayer && knownDuration > 0) {
-    const targetTime =
-      (Number(tmProgress.value) / 100) * knownDuration;
-
+    const targetTime = (Number(tmProgress.value) / 100) * knownDuration;
     whypPlayer.setCurrentTime(targetTime);
   }
-
   isSeeking = false;
 });
 
-
-/* MINIMIZE / EXPAND */
+/* MINIMIZE, HIDE AND REOPEN */
 document.getElementById("tm-minimize").addEventListener("click", function() {
   tm.classList.toggle("minimized");
-
-  this.textContent =
-    tm.classList.contains("minimized") ? "+" : "−";
-
-  setTimeout(tmSnapToCorner, 60);
+  this.textContent = tm.classList.contains("minimized") ? "+" : "−";
+  tmNotifyParentSize();
 });
 
-
-/* HIDE */
 document.getElementById("tm-hide").addEventListener("click", () => {
   tm.classList.add("hidden");
-
-  document
-    .getElementById("tm-player-toggle")
-    .classList.add("visible");
+  tmToggle.classList.add("visible");
+  tmNotifyParentSize();
 });
 
-
-/* REOPEN */
-document.getElementById("tm-player-toggle").addEventListener("click", function() {
+tmToggle.addEventListener("click", () => {
   tm.classList.remove("hidden");
-
-  this.classList.remove("visible");
-
-  setTimeout(tmSnapToCorner, 60);
+  tmToggle.classList.remove("visible");
+  tmNotifyParentSize();
 });
 
-
-/* DRAG AND SNAP TO NEAREST CORNER */
+/* DRAG THE ACTUAL TUMBLR IFRAME.
+   The parent page receives movement deltas and moves the iframe itself. */
 const header = document.getElementById("tm-header");
-
 let dragging = false;
-let offsetX = 0;
-let offsetY = 0;
+let previousScreenX = 0;
+let previousScreenY = 0;
 
 header.addEventListener("pointerdown", event => {
   if (event.target.closest("button")) return;
-
   dragging = true;
-
-  const rect = tm.getBoundingClientRect();
-
-  offsetX = event.clientX - rect.left;
-  offsetY = event.clientY - rect.top;
-
-  tm.style.right = "auto";
-  tm.style.bottom = "auto";
-
+  previousScreenX = event.screenX;
+  previousScreenY = event.screenY;
   tm.classList.add("tm-dragging");
-
   header.setPointerCapture(event.pointerId);
-
+  window.parent.postMessage({ type: "tm-player-drag-start" }, "*");
   event.preventDefault();
 });
 
 header.addEventListener("pointermove", event => {
   if (!dragging) return;
-
-  const rect = tm.getBoundingClientRect();
-
-  const maxLeft = Math.max(10, window.innerWidth - rect.width - 10);
-  const maxTop = Math.max(10, window.innerHeight - rect.height - 10);
-
-  let left = event.clientX - offsetX;
-  let top = event.clientY - offsetY;
-
-  left = Math.max(10, Math.min(left, maxLeft));
-  top = Math.max(10, Math.min(top, maxTop));
-
-  tm.style.left = left + "px";
-  tm.style.top = top + "px";
+  const dx = event.screenX - previousScreenX;
+  const dy = event.screenY - previousScreenY;
+  previousScreenX = event.screenX;
+  previousScreenY = event.screenY;
+  if (dx || dy) {
+    window.parent.postMessage({ type: "tm-player-drag-move", dx, dy }, "*");
+  }
 });
 
 function tmFinishDragging() {
   if (!dragging) return;
-
   dragging = false;
-
   tm.classList.remove("tm-dragging");
-
-  tmSnapToCorner();
+  window.parent.postMessage({ type: "tm-player-drag-end" }, "*");
 }
-
 header.addEventListener("pointerup", tmFinishDragging);
 header.addEventListener("pointercancel", tmFinishDragging);
+window.addEventListener("blur", tmFinishDragging);
 
+/* RECEIVE VIEWPORT SIZE FROM TUMBLR SO THE PLAYLIST CAN FIT THE SCREEN. */
+window.addEventListener("message", event => {
+  if (event.source !== window.parent || !event.data) return;
+  if (event.data.type === "tm-parent-viewport") {
+    tmParentViewport = {
+      width: Number(event.data.width) || window.innerWidth,
+      height: Number(event.data.height) || window.innerHeight
+    };
+    if (tmPlaylist.classList.contains("open")) tmUpdatePlaylistLimit();
+  }
+});
 
-/* WINDOW RESIZE */
-window.addEventListener("resize", tmSnapToCorner);
+/* KEEP THE PARENT'S IFRAME SIZE IN SYNC WITH THE PLAYER. */
+if ("ResizeObserver" in window) {
+  const tmObserver = new ResizeObserver(tmNotifyParentSize);
+  tmObserver.observe(tm);
+  tmObserver.observe(tmToggle);
+}
+window.addEventListener("load", tmNotifyParentSize);
+window.addEventListener("resize", tmNotifyParentSize);
 
-
-/* START PLAYER */
+/* START */
 tmRenderPlaylist();
 tmLoadSong(0, true);
-
-setTimeout(tmSnapToCorner, 100);
-
+tmNotifyParentSize();
 </script>
-
 </body>
 </html>
