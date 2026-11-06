@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,10 +6,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tumblr Vinyl Music Player</title>
 <script src="https://cdn.embed.ly/player-0.1.0.min.js"></script>
+
 <style>
 * { box-sizing: border-box; }
-html, body { margin: 0; padding: 0; width: 100%; min-height: 100%; overflow: hidden; }
-body { font-family: Arial, sans-serif; background: transparent; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: transparent;
+}
 
 #tm-player {
   position: fixed;
@@ -26,7 +39,11 @@ body { font-family: Arial, sans-serif; background: transparent; }
   z-index: 999999;
   isolation: isolate;
 }
-#tm-player.tm-dragging { transition: none; }
+
+#tm-player.tm-dragging {
+  transition: none;
+}
+
 #tm-player.hidden { display: none; }
 
 #tm-header {
@@ -38,22 +55,50 @@ body { font-family: Arial, sans-serif; background: transparent; }
   touch-action: none;
   user-select: none;
 }
+
 #tm-header:active { cursor: grabbing; }
-.tm-header-title { font-size: 12px; letter-spacing: 2px; color: #f00; font-weight: bold; }
-.tm-header-buttons { display: flex; gap: 6px; }
-.tm-header-buttons button {
-  width: 25px; height: 25px; border: 0; border-radius: 6px;
-  background: #29292f; color: #fff; cursor: pointer; font-size: 15px;
+
+.tm-header-title {
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: #f00;
+  font-weight: bold;
 }
+
+.tm-header-buttons { display: flex; gap: 6px; }
+
+.tm-header-buttons button {
+  width: 25px;
+  height: 25px;
+  border: 0;
+  border-radius: 6px;
+  background: #29292f;
+  color: #fff;
+  cursor: pointer;
+  font-size: 15px;
+}
+
 .tm-header-buttons button:hover { background: #f00; }
 
 #tm-artwork {
-  width: 100%; display: flex; align-items: center; justify-content: center;
-  padding: 5px 0 17px; position: relative; overflow: visible;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 0 17px;
+  position: relative;
+  overflow: visible;
 }
+
 #tm-vinyl {
-  width: 220px; height: 220px; max-width: 100%; aspect-ratio: 1 / 1;
-  border-radius: 50%; position: relative; display: flex; align-items: center;
+  width: 220px;
+  height: 220px;
+  max-width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  position: relative;
+  display: flex;
+  align-items: center;
   justify-content: center;
   background: repeating-radial-gradient(circle at center,
     #080808 0px, #242428 2px, #080808 4px, #19191d 6px, #080808 8px);
@@ -61,166 +106,407 @@ body { font-family: Arial, sans-serif; background: transparent; }
   box-shadow: 0 8px 22px rgba(0,0,0,.7), inset 0 0 0 2px #414149;
   will-change: transform;
 }
+
 #tm-vinyl::before {
-  content: ""; position: absolute; inset: 15px; border-radius: 50%;
-  border: 1px solid rgba(255,255,255,.08); pointer-events: none;
+  content: "";
+  position: absolute;
+  inset: 15px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.08);
+  pointer-events: none;
 }
+
 #tm-vinyl::after {
-  content: ""; position: absolute; inset: 4px; border-radius: 50%;
-  border: 1px solid rgba(255,255,255,.07); pointer-events: none;
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.07);
+  pointer-events: none;
 }
+
 #tm-vinyl-label {
-  position: relative; width: 94px; height: 94px; border-radius: 50%;
-  overflow: hidden; background: #f00; display: flex; align-items: center;
-  justify-content: center; border: 3px solid #080808; z-index: 1;
+  position: relative;
+  width: 94px;
+  height: 94px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #f00;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid #080808;
+  z-index: 1;
 }
-#tm-cover { width: 100%; height: 100%; object-fit: cover; display: none; }
+
+#tm-cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: none;
+}
+
 .tm-note { font-size: 30px; color: #fff; }
+
 #tm-vinyl-spindle {
-  position: absolute; width: 9px; height: 9px; border-radius: 50%;
-  background: #fff; border: 2px solid #f00; z-index: 3; pointer-events: none;
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #f00;
+  z-index: 3;
+  pointer-events: none;
 }
+
 #tm-tonearm-svg {
-  position: absolute; top: -5px; left: calc(58% - 1px); width: 120px;
-  height: 150px; overflow: visible; z-index: 6; pointer-events: none; display: block;
+  position: absolute;
+  top: -5px;
+  left: calc(58% - 1px);
+  width: 120px;
+  height: 150px;
+  overflow: visible;
+  z-index: 6;
+  pointer-events: none;
+  display: block;
 }
+
 #tone-arm {
-  transform-box: view-box; transform-origin: 92px 24px; transform: rotate(-15deg);
+  transform-box: view-box;
+  transform-origin: 92px 24px;
+  transform: rotate(-15deg);
   transition: transform .6s cubic-bezier(.4,0,.2,1);
 }
-#tm-artwork.is-playing #tone-arm { transform: rotate(8deg); }
+
+#tm-artwork.is-playing #tone-arm {
+  transform: rotate(8deg);
+}
+
 #tm-player.minimized #tm-tonearm-svg { display: none; }
 
 #tm-status {
-  text-align: center; font-size: 10px; color: #777780; margin-top: -8px;
-  margin-bottom: 12px; letter-spacing: 1px;
+  text-align: center;
+  font-size: 10px;
+  color: #777780;
+  margin-top: -8px;
+  margin-bottom: 12px;
+  letter-spacing: 1px;
 }
-#tm-track { text-align: left; margin-bottom: 15px; min-width: 0; }
+
+#tm-track {
+  text-align: left;
+  margin-bottom: 15px;
+  min-width: 0;
+}
+
 #tm-title {
-  font-size: 16px; font-weight: bold; margin-bottom: 5px; color: #f00;
-  overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #f00;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
+
 #tm-subtitle {
-  display: none; font-size: 10px; color: #777780; margin-top: -2px;
-  margin-bottom: 5px; letter-spacing: .5px; overflow: hidden;
-  white-space: nowrap; text-overflow: ellipsis;
+  display: none;
+  font-size: 10px;
+  color: #777780;
+  margin-top: -2px;
+  margin-bottom: 5px;
+  letter-spacing: .5px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
+
 #tm-artist { font-size: 12px; color: #a5a5ad; }
 
 #tm-progress-wrap {
-  display: flex; align-items: center; gap: 8px; font-size: 10px;
-  color: #a5a5ad; margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  color: #a5a5ad;
+  margin-bottom: 15px;
 }
+
 #tm-progress {
-  flex: 1; min-width: 0; height: 3px; appearance: none; -webkit-appearance: none;
-  background: #414149; border-radius: 10px; outline: none; cursor: pointer;
+  flex: 1;
+  min-width: 0;
+  height: 3px;
+  appearance: none;
+  -webkit-appearance: none;
+  background: #414149;
+  border-radius: 10px;
+  outline: none;
+  cursor: pointer;
 }
+
 #tm-progress::-webkit-slider-thumb {
-  appearance: none; -webkit-appearance: none; width: 10px; height: 10px;
-  border-radius: 50%; background: #f00;
+  appearance: none;
+  -webkit-appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #f00;
 }
+
 #tm-progress::-moz-range-thumb {
-  width: 10px; height: 10px; border: 0; border-radius: 50%; background: #f00;
+  width: 10px;
+  height: 10px;
+  border: 0;
+  border-radius: 50%;
+  background: #f00;
 }
 
 #tm-controls {
-  display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 17px; padding: 0 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 17px;
+  padding: 0 5px;
 }
+
 #tm-controls button {
-  border: 0; background: transparent; color: #fff; cursor: pointer;
-  font-size: 18px; width: 38px; height: 38px; display: flex;
-  align-items: center; justify-content: center; border-radius: 50%;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  font-size: 18px;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
 }
+
 #tm-controls button:hover { color: #f00; }
+
 #tm-controls #tm-play {
-  width: 47px; height: 47px; border-radius: 50%; background: #f00;
-  color: #fff; font-size: 19px;
+  width: 47px;
+  height: 47px;
+  border-radius: 50%;
+  background: #f00;
+  color: #fff;
+  font-size: 19px;
 }
+
 #tm-controls #tm-play:hover { background: #ff5360; }
 #tm-controls button.active { color: #f00; }
 
 #tm-tools {
-  display: flex; justify-content: space-between; align-items: center;
-  border-top: 1px solid #38383f; padding-top: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #38383f;
+  padding-top: 12px;
 }
+
 #tm-tools button {
-  background: transparent; border: 0; color: #a5a5ad; cursor: pointer;
-  font-size: 12px; padding: 5px; border-radius: 6px;
+  background: transparent;
+  border: 0;
+  color: #a5a5ad;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 5px;
+  border-radius: 6px;
 }
-#tm-tools button:hover, #tm-tools button.active { color: #fff; background: #29292f; }
+
+#tm-tools button:hover,
+#tm-tools button.active {
+  color: #fff;
+  background: #29292f;
+}
+
 .tm-tool-label {
-  display: flex; align-items: center; gap: 6px; letter-spacing: 1px; font-size: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  letter-spacing: 1px;
+  font-size: 10px;
 }
 
 #tm-playlist {
-  display: none; border-top: 1px solid #38383f; margin-top: 10px;
-  padding-top: 8px; max-height: 150px; overflow-y: auto; overscroll-behavior: contain;
+  display: none;
+  border-top: 1px solid #38383f;
+  margin-top: 10px;
+  padding-top: 8px;
+  max-height: 150px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
+
 #tm-playlist.open { display: block; }
+
 .tm-song {
-  width: 100%; padding: 9px; border: 0; border-radius: 7px;
-  background: transparent; color: #fff; cursor: pointer; display: flex;
-  align-items: center; justify-content: space-between; gap: 8px;
-  text-align: left; font-size: 12px;
+  width: 100%;
+  padding: 9px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  text-align: left;
+  font-size: 12px;
 }
+
 .tm-song:hover { background: #29292f; }
 .tm-song.active { background: #3b171c; color: #ff6b75; }
 .tm-song-info { min-width: 0; }
+
 .tm-song-title {
-  display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
-.tm-song-artist { display: block; color: #a5a5ad; font-size: 10px; margin-top: 3px; }
-.tm-song-playing { color: #f00; flex-shrink: 0; }
+
+.tm-song-artist {
+  display: block;
+  color: #a5a5ad;
+  font-size: 10px;
+  margin-top: 3px;
+}
+
+.tm-song-playing {
+  color: #f00;
+  flex-shrink: 0;
+}
 
 #tm-volume-panel {
-  display: none; align-items: center; gap: 10px; border-top: 1px solid #38383f;
-  padding: 12px 5px 3px; margin-top: 10px; color: #a5a5ad; font-size: 13px;
+  display: none;
+  align-items: center;
+  gap: 10px;
+  border-top: 1px solid #38383f;
+  padding: 12px 5px 3px;
+  margin-top: 10px;
+  color: #a5a5ad;
+  font-size: 13px;
 }
+
 #tm-volume-panel.open { display: flex; }
-#tm-volume { flex: 1; min-width: 0; accent-color: #f00; cursor: pointer; }
+
+#tm-volume {
+  flex: 1;
+  min-width: 0;
+  accent-color: #f00;
+  cursor: pointer;
+}
 
 #tm-player-toggle {
-  display: none; position: fixed; left: 0; top: 0; z-index: 999998;
-  border: 0; border-radius: 50%; width: 45px; height: 45px;
-  background: #f00; color: #fff; font-size: 20px; cursor: pointer;
+  display: none;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 999998;
+  border: 0;
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  background: #f00;
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
 }
+
 #tm-player-toggle.visible { display: block; }
 #tm-player-toggle:hover { background: #ff5360; }
 
-#tm-player.minimized { width: 270px; padding: 12px; }
+#tm-player.minimized {
+  width: 270px;
+  padding: 12px;
+}
+
 #tm-player.minimized #tm-header { margin-bottom: 10px; }
+
 #tm-player.minimized #tm-content {
-  display: grid; grid-template-columns: 64px minmax(0,1fr);
-  align-items: center; gap: 10px;
+  display: grid;
+  grid-template-columns: 64px minmax(0,1fr);
+  align-items: center;
+  gap: 10px;
 }
+
 #tm-player.minimized #tm-artwork {
-  width: 64px; height: 64px; padding: 0; margin: 0; grid-column: 1; grid-row: 1;
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  margin: 0;
+  grid-column: 1;
+  grid-row: 1;
 }
-#tm-player.minimized #tm-vinyl { width: 64px; height: 64px; border-width: 2px; }
-#tm-player.minimized #tm-vinyl-label { width: 28px; height: 28px; border-width: 1px; }
+
+#tm-player.minimized #tm-vinyl {
+  width: 64px;
+  height: 64px;
+  border-width: 2px;
+}
+
+#tm-player.minimized #tm-vinyl-label {
+  width: 28px;
+  height: 28px;
+  border-width: 1px;
+}
+
 #tm-player.minimized .tm-note { font-size: 12px; }
-#tm-player.minimized #tm-vinyl-spindle { width: 5px; height: 5px; border-width: 1px; }
+
+#tm-player.minimized #tm-vinyl-spindle {
+  width: 5px;
+  height: 5px;
+  border-width: 1px;
+}
+
 #tm-player.minimized #tm-vinyl::before { inset: 5px; }
 #tm-player.minimized #tm-vinyl::after { inset: 2px; }
-#tm-player.minimized #tm-track { grid-column: 2; grid-row: 1; margin: 0; min-width: 0; }
+
+#tm-player.minimized #tm-track {
+  grid-column: 2;
+  grid-row: 1;
+  margin: 0;
+  min-width: 0;
+}
+
 #tm-player.minimized #tm-title { font-size: 13px; }
-#tm-player.minimized #tm-subtitle { font-size: 9px; margin-bottom: 3px; }
+
+#tm-player.minimized #tm-subtitle {
+  font-size: 9px;
+  margin-bottom: 3px;
+}
+
 #tm-player.minimized #tm-artist { font-size: 11px; }
+
 #tm-player.minimized #tm-progress-wrap,
 #tm-player.minimized #tm-controls,
 #tm-player.minimized #tm-tools,
 #tm-player.minimized #tm-playlist,
 #tm-player.minimized #tm-volume-panel,
-#tm-player.minimized #tm-status { display: none !important; }
+#tm-player.minimized #tm-status {
+  display: none !important;
+}
 
 #tm-playlist::-webkit-scrollbar { width: 5px; }
 #tm-playlist::-webkit-scrollbar-track { background: #101014; }
-#tm-playlist::-webkit-scrollbar-thumb { background: #f00; border-radius: 10px; }
+#tm-playlist::-webkit-scrollbar-thumb {
+  background: #f00;
+  border-radius: 10px;
+}
 
 #tm-whyp-host {
-  position: fixed; left: -10000px; top: 0; width: 330px; height: 200px;
-  overflow: hidden; opacity: 0; pointer-events: none; z-index: -1;
+  position: fixed;
+  left: -10000px;
+  top: 0;
+  width: 330px;
+  height: 200px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  z-index: -1;
 }
 
 /* ==========================================
@@ -228,18 +514,7 @@ body { font-family: Arial, sans-serif; background: transparent; }
    ========================================== */
 
 #tm-player {
-  background:
-    linear-gradient(
-      rgba(12, 10, 14, 0.30),
-      rgba(12, 10, 14, 0.40)
-    ),
-    url("marble.png");
-
-  background-size: 330px auto;
-background-position: top center;
-background-repeat: no-repeat;
-background-color: #171619;
-
+  background-color: #171619;
   color: #e6e0df;
   border: 2px solid #0d0d0d;
   border-radius: 5px;
@@ -250,12 +525,33 @@ background-color: #171619;
     0 12px 35px rgba(0,0,0,.85),
     inset 0 0 22px rgba(0,0,0,.8);
 
+  /* Smoothly animate the actual player height */
   transition:
-  height 0.35s ease,
-  width 0.35s ease,
-  box-shadow 0.35s ease;
-  
-    position: fixed;
+    height 0.45s cubic-bezier(.22,.61,.36,1),
+    width 0.45s ease,
+    box-shadow 0.35s ease;
+
+  position: fixed;
+}
+
+/* Marble background */
+.tm-marble-bg {
+  position: absolute !important;
+  inset: 0;
+  z-index: 0 !important;
+  border-radius: inherit;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.tm-marble-bg img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
 }
 
 /* Inner ornamental silver frame */
@@ -268,8 +564,7 @@ background-color: #171619;
   z-index: 10;
 }
 
-/* Four separate ornaments, with the decorative layer extending
-   beyond the player so the images are not clipped at its edges. */
+/* Four separate ornaments */
 #tm-player::after {
   content: "";
   position: absolute;
@@ -298,7 +593,7 @@ background-color: #171619;
     bottom right;
 }
 
-/* Smaller corner ornaments when minimized */
+/* Smaller ornaments when minimized */
 #tm-player.minimized::after {
   inset: -13px;
 
@@ -309,13 +604,20 @@ background-color: #171619;
     65px 65px;
 }
 
-/* Keep the player contents underneath the decorative corner layer. */
+/* Keep the contents above the marble */
 #tm-player > * {
   position: relative;
   z-index: 1;
 }
 
-/* Ornate music box header */
+/* Keep the marble layer behind everything */
+#tm-player > .tm-marble-bg {
+  position: absolute !important;
+  inset: 0;
+  z-index: 0 !important;
+}
+
+/* Ornate header */
 #tm-header {
   border-bottom: 1px solid #716b73;
   padding: 0 3px 12px;
@@ -353,7 +655,7 @@ background-color: #171619;
   color: #171419;
 }
 
-/* Record becomes dark polished obsidian */
+/* Obsidian vinyl */
 #tm-vinyl {
   background:
     repeating-radial-gradient(circle at center,
@@ -362,7 +664,9 @@ background-color: #171619;
       #09090b 4px,
       #1a191e 6px,
       #050505 8px);
+
   border: 5px solid #17151a;
+
   box-shadow:
     0 8px 25px rgba(0,0,0,.9),
     0 0 0 2px #817980,
@@ -442,6 +746,7 @@ background-color: #171619;
   background: linear-gradient(145deg, #bdb2b3, #514b55);
   color: #171419;
   border: 2px solid #ded3d0;
+
   box-shadow:
     0 3px 10px rgba(0,0,0,.7),
     inset 0 1px 3px rgba(255,255,255,.5);
@@ -453,7 +758,7 @@ background-color: #171619;
 
 #tm-controls button.active { color: #e5c8cf; }
 
-/* Ornamental dividers and tool buttons */
+/* Tool buttons */
 #tm-tools {
   border-top: 1px solid #6c646e;
   border-bottom: 1px solid rgb(28, 28, 28);
@@ -515,7 +820,6 @@ background-color: #171619;
   left: 0;
   top: 0;
   z-index: 999998;
-
   width: 45px;
   height: 45px;
   border-radius: 50%;
@@ -529,6 +833,7 @@ background-color: #171619;
   background-position: center;
 
   border: 2px solid #242020;
+
   box-shadow:
     0 3px 15px rgba(0,0,0,.8),
     inset 0 0 8px rgba(0,0,0,.7);
@@ -555,31 +860,34 @@ background-color: #171619;
   object-fit: contain;
   display: block;
   pointer-events: none;
-transition: filter 0.3s ease;
+  transition: filter 0.3s ease;
 }
 
-#tm-player-toggle:hover img {
-  filter: invert(1);
-}
-
-#tm-player-toggle:hover { background: #e0d5d3; }
+#tm-player-toggle:hover img { filter: invert(1); }
 
 /* Minimized music box */
 #tm-player.minimized { border-radius: 4px; }
 
-/* Playlist scrollbar */
 #tm-playlist::-webkit-scrollbar-track { background: #17151a; }
+
 #tm-playlist::-webkit-scrollbar-thumb {
   background: #827782;
   border-radius: 2px;
 }
 </style>
 </head>
+
 <body>
 
 <div id="tm-player">
+
+  <div class="tm-marble-bg" aria-hidden="true">
+    <img src="marble.png" alt="">
+  </div>
+
   <div id="tm-header">
     <div class="tm-header-title">NOW PLAYING ♫</div>
+
     <div class="tm-header-buttons">
       <button id="tm-minimize" title="Minimize">−</button>
       <button id="tm-hide" title="Hide">×</button>
@@ -587,12 +895,15 @@ transition: filter 0.3s ease;
   </div>
 
   <div id="tm-content">
+
     <div id="tm-artwork">
       <div id="tm-vinyl">
+
         <div id="tm-vinyl-label">
           <img id="tm-cover" alt="Album artwork">
           <div class="tm-note">♫</div>
         </div>
+
         <div id="tm-vinyl-spindle"></div>
       </div>
 
@@ -605,20 +916,25 @@ transition: filter 0.3s ease;
             <stop offset="75%" stop-color="#f5f5f7"/>
             <stop offset="100%" stop-color="#77777d"/>
           </linearGradient>
+
           <linearGradient id="silver-weight" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0%" stop-color="#f4f4f4"/>
             <stop offset="45%" stop-color="#aeb0b7"/>
             <stop offset="100%" stop-color="#66666d"/>
           </linearGradient>
+
           <filter id="tonearm-shadow" x="-30%" y="-30%" width="160%" height="160%">
             <feDropShadow dx="1" dy="2" stdDeviation="1.5" flood-opacity="0.35"/>
           </filter>
         </defs>
+
         <g id="tone-arm">
           <circle cx="92" cy="24" r="14" fill="url(#silver-weight)" stroke="#55555b" stroke-width="1" filter="url(#tonearm-shadow)"/>
           <circle cx="92" cy="24" r="10" fill="none" stroke="#eeeeee" stroke-width="1" opacity="0.6"/>
           <circle cx="92" cy="24" r="3" fill="#66666d"/>
+
           <line x1="92" y1="32" x2="72" y2="114" stroke="url(#silver-metal)" stroke-width="5" stroke-linecap="round" filter="url(#tonearm-shadow)"/>
+
           <g transform="translate(68, 106) rotate(-18)">
             <rect x="0" y="0" width="11" height="22" rx="2" fill="url(#silver-metal)" stroke="#66666d" stroke-width="0.7"/>
             <rect x="1" y="16" width="9" height="6" rx="1" fill="#171419"/>
@@ -628,6 +944,7 @@ transition: filter 0.3s ease;
     </div>
 
     <div id="tm-status">Ready</div>
+
     <div id="tm-track">
       <div id="tm-title">Loading...</div>
       <div id="tm-subtitle"></div>
@@ -650,10 +967,13 @@ transition: filter 0.3s ease;
 
     <div id="tm-tools">
       <button id="tm-playlist-toggle" class="tm-tool-label" title="Open playlist">
-        <span>☷</span><span>PLAYLIST</span>
+        <span>☷</span>
+        <span>PLAYLIST</span>
       </button>
+
       <button id="tm-volume-toggle" class="tm-tool-label" title="Volume">
-        <span id="tm-volume-icon">♫</span><span>VOLUME</span>
+        <span id="tm-volume-icon">♫</span>
+        <span>VOLUME</span>
       </button>
     </div>
 
@@ -663,12 +983,14 @@ transition: filter 0.3s ease;
       <span id="tm-volume-icon-label">♫</span>
       <input type="range" id="tm-volume" min="0" max="100" value="70">
     </div>
+
   </div>
 </div>
 
 <button id="tm-player-toggle" aria-label="Reopen music player">
   <img src="sheep.png" alt="">
 </button>
+
 <div id="tm-whyp-host"></div>
 
 <script>
@@ -701,6 +1023,7 @@ const tmNote = document.querySelector("#tm-vinyl-label .tm-note");
 const tmVinyl = document.getElementById("tm-vinyl");
 const tmArtwork = document.getElementById("tm-artwork");
 const tmToggle = document.getElementById("tm-player-toggle");
+const tmVolumePanel = document.getElementById("tm-volume-panel");
 
 let currentSong = 0;
 let whypFrame = null;
@@ -713,14 +1036,101 @@ let knownDuration = 0;
 let lastTimeUpdate = Date.now();
 let tmStallChecker = null;
 let stallWarningShown = false;
-let tmParentViewport = { width: window.innerWidth, height: window.innerHeight };
+
+let tmParentViewport = {
+  width: window.innerWidth,
+  height: window.innerHeight
+};
+
+/* ==========================================
+   SMOOTH PLAYER HEIGHT ANIMATION
+   ========================================== */
+
+let tmHeightAnimationHandler = null;
+
+function tmAnimatePlayerHeight(updateFunction) {
+
+  /* Get the player's current visible height.
+     This also works if another animation is
+     already running. */
+  const currentHeight = tm.getBoundingClientRect().height;
+
+  /* Remove any unfinished previous animation. */
+  if (tmHeightAnimationHandler) {
+    tm.removeEventListener("transitionend", tmHeightAnimationHandler);
+    tmHeightAnimationHandler = null;
+  }
+
+  /* Temporarily freeze the player at its
+     current visible height. */
+  tm.style.transition = "none";
+  tm.style.height = currentHeight + "px";
+
+  /* Make the requested change:
+     opening or closing playlist/volume. */
+  updateFunction();
+
+  /* Temporarily allow natural height so we
+     can measure the new desired height. */
+  tm.style.height = "auto";
+  const targetHeight = tm.getBoundingClientRect().height;
+
+  /* Return to the starting height before
+     starting the transition. */
+  tm.style.height = currentHeight + "px";
+
+  /* Force the browser to register the
+     starting height before animating. */
+  tm.offsetHeight;
+
+  /* Restore the CSS transition. */
+  tm.style.transition = "";
+
+  /* If the height hasn't changed, return
+     to automatic height without animating. */
+  if (Math.abs(targetHeight - currentHeight) < 1) {
+    tm.style.height = "auto";
+    tmNotifyParentSize();
+    return;
+  }
+
+  /* Once the height animation finishes,
+     return to automatic height. This lets
+     the player adapt naturally to content. */
+  tmHeightAnimationHandler = function(event) {
+    if (event.target !== tm || event.propertyName !== "height") return;
+
+    tm.removeEventListener("transitionend", tmHeightAnimationHandler);
+    tmHeightAnimationHandler = null;
+    tm.style.height = "auto";
+
+    tmNotifyParentSize();
+  };
+
+  tm.addEventListener("transitionend", tmHeightAnimationHandler);
+
+  /* Start the animation on the next frame. */
+  requestAnimationFrame(() => {
+    tm.style.height = targetHeight + "px";
+  });
+
+  tmNotifyParentSize();
+}
+
+/* ==========================================
+   PARENT IFRAME SIZE NOTIFICATION
+   ========================================== */
 
 let tmResizeQueued = false;
+
 function tmNotifyParentSize() {
   if (tmResizeQueued) return;
+
   tmResizeQueued = true;
+
   requestAnimationFrame(() => {
     tmResizeQueued = false;
+
     const visibleElement = tm.classList.contains("hidden") ? tmToggle : tm;
     const rect = visibleElement.getBoundingClientRect();
     const extraSpace = 15;
@@ -733,34 +1143,54 @@ function tmNotifyParentSize() {
   });
 }
 
+/* ==========================================
+   PLAYLIST HEIGHT LIMIT
+   ========================================== */
+
 function tmUpdatePlaylistLimit() {
+
   if (!tmPlaylist.classList.contains("open")) {
     tmPlaylist.style.maxHeight = "150px";
     tmNotifyParentSize();
     return;
   }
 
+  /* Temporarily measure the natural collapsed
+     player height, without the playlist. */
+  const previousHeight = tm.style.height;
+
+  tm.style.height = "auto";
   tmPlaylist.classList.remove("open");
+
   const collapsedHeight = tm.getBoundingClientRect().height;
+
   tmPlaylist.classList.add("open");
+  tm.style.height = previousHeight;
 
   const available = tmParentViewport.height - collapsedHeight - 40;
   const maxHeight = Math.max(50, Math.min(150, available));
+
   tmPlaylist.style.maxHeight = maxHeight + "px";
+
   tmNotifyParentSize();
 }
 
-/* VINYL ROTATION */
+/* ==========================================
+   VINYL ROTATION
+   ========================================== */
+
 let tmVinylAngle = 0;
 let tmLastFrame = null;
 let tmAnimationFrame = null;
 
 function tmSpinFrame(timestamp) {
   if (!isPlaying) return;
+
   if (tmLastFrame !== null) {
     const elapsed = timestamp - tmLastFrame;
     tmVinylAngle = (tmVinylAngle + elapsed * 0.09) % 360;
   }
+
   tmLastFrame = timestamp;
   tmVinyl.style.transform = `rotate(${tmVinylAngle}deg)`;
   tmAnimationFrame = requestAnimationFrame(tmSpinFrame);
@@ -768,6 +1198,7 @@ function tmSpinFrame(timestamp) {
 
 function tmSetPlaying(playing) {
   isPlaying = playing;
+
   if (playing) {
     tmLastFrame = null;
     cancelAnimationFrame(tmAnimationFrame);
@@ -778,6 +1209,7 @@ function tmSetPlaying(playing) {
     tmLastFrame = null;
     tmVinyl.style.transform = `rotate(${tmVinylAngle}deg)`;
   }
+
   tmArtwork.classList.toggle("is-playing", playing);
   tmPlay.textContent = playing ? "Ⅱ" : "▶";
   tmPlay.title = playing ? "Pause" : "Play";
@@ -785,14 +1217,20 @@ function tmSetPlaying(playing) {
 
 function tmFormatTime(seconds) {
   if (!Number.isFinite(seconds)) return "0:00";
+
   const minutes = Math.floor(seconds / 60);
   const remaining = Math.floor(seconds % 60);
+
   return minutes + ":" + String(remaining).padStart(2, "0");
 }
 
-/* RENDER PLAYLIST */
+/* ==========================================
+   RENDER PLAYLIST
+   ========================================== */
+
 function tmRenderPlaylist() {
   tmPlaylist.innerHTML = "";
+
   tmSongs.forEach((song, index) => {
     const item = document.createElement("button");
     item.type = "button";
@@ -818,24 +1256,34 @@ function tmRenderPlaylist() {
 
     item.appendChild(info);
     item.appendChild(playingMark);
+
     item.addEventListener("click", () => tmLoadSong(index, true));
+
     tmPlaylist.appendChild(item);
   });
 }
 
-/* LOAD SONG */
+/* ==========================================
+   LOAD SONG
+   ========================================== */
+
 function tmLoadSong(index, autoplay = false) {
   currentSong = (index + tmSongs.length) % tmSongs.length;
+
   const song = tmSongs[currentSong];
 
   tmSetPlaying(false);
   stallWarningShown = false;
 
   const bracketText = song.title.match(/\[([^\]]+)\]/g);
+
   tmTitle.textContent = song.title.replace(/\s*\[[^\]]+\]/g, "").trim();
 
   if (bracketText) {
-    tmSubtitle.textContent = bracketText.map(text => text.replace(/[\[\]]/g, "")).join(" • ");
+    tmSubtitle.textContent = bracketText
+      .map(text => text.replace(/[\[\]]/g, ""))
+      .join(" • ");
+
     tmSubtitle.style.display = "block";
   } else {
     tmSubtitle.textContent = "";
@@ -844,9 +1292,11 @@ function tmLoadSong(index, autoplay = false) {
 
   tmArtist.textContent = song.artist;
   tmStatus.textContent = autoplay ? "Loading next track..." : "Loading track...";
+
   tmProgress.value = 0;
   tmCurrent.textContent = "0:00";
   tmDuration.textContent = "0:00";
+
   knownDuration = 0;
   lastTimeUpdate = Date.now();
 
@@ -861,10 +1311,12 @@ function tmLoadSong(index, autoplay = false) {
       tmCover.style.display = "block";
       tmNote.style.display = "none";
     };
+
     tmCover.onerror = () => {
       tmCover.style.display = "none";
       tmNote.style.display = "block";
     };
+
     tmCover.src = song.cover;
   } else {
     tmCover.removeAttribute("src");
@@ -886,6 +1338,7 @@ function tmLoadSong(index, autoplay = false) {
   whypFrame.setAttribute("scrolling", "no");
   whypFrame.setAttribute("frameborder", "0");
   whypFrame.setAttribute("allow", "autoplay");
+
   document.getElementById("tm-whyp-host").appendChild(whypFrame);
 
   if (typeof playerjs === "undefined") {
@@ -898,7 +1351,9 @@ function tmLoadSong(index, autoplay = false) {
 
   thisPlayer.on("ready", () => {
     if (whypPlayer !== thisPlayer) return;
+
     thisPlayer.setVolume(Number(tmVolume.value) / 100);
+
     if (autoplay) {
       tmStatus.textContent = "Starting playback...";
       thisPlayer.play();
@@ -909,8 +1364,10 @@ function tmLoadSong(index, autoplay = false) {
 
   thisPlayer.on("play", () => {
     if (whypPlayer !== thisPlayer) return;
+
     lastTimeUpdate = Date.now();
     stallWarningShown = false;
+
     tmSetPlaying(true);
     tmStatus.textContent = "Playing!";
     tmRenderPlaylist();
@@ -918,6 +1375,7 @@ function tmLoadSong(index, autoplay = false) {
 
   thisPlayer.on("pause", () => {
     if (whypPlayer !== thisPlayer) return;
+
     tmSetPlaying(false);
     tmStatus.textContent = "Paused.";
     tmRenderPlaylist();
@@ -925,24 +1383,34 @@ function tmLoadSong(index, autoplay = false) {
 
   thisPlayer.on("timeupdate", data => {
     if (whypPlayer !== thisPlayer || !data) return;
+
     lastTimeUpdate = Date.now();
     stallWarningShown = false;
-    if (tmStatus.textContent === "Playback may be buffering...") tmStatus.textContent = "Playing!";
+
+    if (tmStatus.textContent === "Playback may be buffering...") {
+      tmStatus.textContent = "Playing!";
+    }
 
     const current = Number(data.seconds) || 0;
     const duration = Number(data.duration) || 0;
+
     if (duration > 0) knownDuration = duration;
 
     if (!isSeeking && knownDuration > 0) {
       tmProgress.value = (current / knownDuration) * 100;
     }
+
     tmCurrent.textContent = tmFormatTime(current);
     tmDuration.textContent = tmFormatTime(knownDuration);
   });
 
   tmStallChecker = setInterval(() => {
-    if (whypPlayer === thisPlayer && isPlaying && !stallWarningShown &&
-        Date.now() - lastTimeUpdate > 15000) {
+    if (
+      whypPlayer === thisPlayer &&
+      isPlaying &&
+      !stallWarningShown &&
+      Date.now() - lastTimeUpdate > 15000
+    ) {
       stallWarningShown = true;
       tmStatus.textContent = "Playback may be buffering...";
     }
@@ -950,20 +1418,30 @@ function tmLoadSong(index, autoplay = false) {
 
   thisPlayer.on("ended", () => {
     if (whypPlayer !== thisPlayer) return;
+
     if (isLoop) tmLoadSong(currentSong, true);
     else tmNextSong();
   });
 
   thisPlayer.on("error", () => {
     if (whypPlayer !== thisPlayer) return;
+
     tmSetPlaying(false);
     tmStatus.textContent = "Playback error. Check the Whyp track.";
   });
 }
 
-/* PLAYBACK CONTROLS */
-function tmPlaySong() { if (whypPlayer) whypPlayer.play(); }
-function tmPauseSong() { if (whypPlayer) whypPlayer.pause(); }
+/* ==========================================
+   PLAYBACK CONTROLS
+   ========================================== */
+
+function tmPlaySong() {
+  if (whypPlayer) whypPlayer.play();
+}
+
+function tmPauseSong() {
+  if (whypPlayer) whypPlayer.pause();
+}
 
 tmPlay.addEventListener("click", () => {
   if (isPlaying) tmPauseSong();
@@ -973,14 +1451,21 @@ tmPlay.addEventListener("click", () => {
 function tmNextSong() {
   if (isShuffle && tmSongs.length > 1) {
     let next;
-    do { next = Math.floor(Math.random() * tmSongs.length); }
-    while (next === currentSong);
+
+    do {
+      next = Math.floor(Math.random() * tmSongs.length);
+    } while (next === currentSong);
+
     tmLoadSong(next, true);
   } else {
     tmLoadSong(currentSong + 1, true);
   }
 }
-function tmPreviousSong() { tmLoadSong(currentSong - 1, true); }
+
+function tmPreviousSong() {
+  tmLoadSong(currentSong - 1, true);
+}
+
 document.getElementById("tm-next").addEventListener("click", tmNextSong);
 document.getElementById("tm-prev").addEventListener("click", tmPreviousSong);
 
@@ -994,47 +1479,80 @@ document.getElementById("tm-loop").addEventListener("click", function() {
   this.classList.toggle("active", isLoop);
 });
 
-/* DROPDOWNS */
+/* ==========================================
+   DROPDOWNS WITH SMOOTH EXTENSION
+   ========================================== */
+
+/* Playlist button */
 document.getElementById("tm-playlist-toggle").addEventListener("click", function() {
-  const isOpen = tmPlaylist.classList.toggle("open");
-  this.classList.toggle("active", isOpen);
-  tmUpdatePlaylistLimit();
+
+  tmAnimatePlayerHeight(() => {
+    const isOpen = tmPlaylist.classList.toggle("open");
+
+    this.classList.toggle("active", isOpen);
+
+    tmUpdatePlaylistLimit();
+  });
+
 });
 
+/* Volume button */
 document.getElementById("tm-volume-toggle").addEventListener("click", function() {
-  const panel = document.getElementById("tm-volume-panel");
-  const isOpen = panel.classList.toggle("open");
-  this.classList.toggle("active", isOpen);
-  tmNotifyParentSize();
+
+  tmAnimatePlayerHeight(() => {
+    const isOpen = tmVolumePanel.classList.toggle("open");
+
+    this.classList.toggle("active", isOpen);
+  });
+
 });
 
+/* Volume slider */
 tmVolume.addEventListener("input", () => {
   const volume = Number(tmVolume.value);
-  if (whypPlayer) whypPlayer.setVolume(volume / 100);
-  document.getElementById("tm-volume-icon").textContent = volume === 0 ? "×" : "♫";
+
+  if (whypPlayer) {
+    whypPlayer.setVolume(volume / 100);
+  }
+
+  document.getElementById("tm-volume-icon").textContent =
+    volume === 0 ? "×" : "♫";
 });
 
-/* SEEK BAR */
+/* ==========================================
+   SEEK BAR
+   ========================================== */
+
 tmProgress.addEventListener("input", () => {
   isSeeking = true;
+
   if (knownDuration > 0) {
     const previewTime = (Number(tmProgress.value) / 100) * knownDuration;
     tmCurrent.textContent = tmFormatTime(previewTime);
   }
 });
+
 tmProgress.addEventListener("change", () => {
   if (whypPlayer && knownDuration > 0) {
     const targetTime = (Number(tmProgress.value) / 100) * knownDuration;
     whypPlayer.setCurrentTime(targetTime);
   }
+
   isSeeking = false;
 });
 
-/* MINIMIZE, HIDE AND REOPEN */
+/* ==========================================
+   MINIMIZE, HIDE AND REOPEN
+   ========================================== */
+
 document.getElementById("tm-minimize").addEventListener("click", function() {
-  tm.classList.toggle("minimized");
-  this.textContent = tm.classList.contains("minimized") ? "+" : "−";
-  tmNotifyParentSize();
+
+  tmAnimatePlayerHeight(() => {
+    tm.classList.toggle("minimized");
+
+    this.textContent = tm.classList.contains("minimized") ? "+" : "−";
+  });
+
 });
 
 document.getElementById("tm-hide").addEventListener("click", () => {
@@ -1049,69 +1567,110 @@ tmToggle.addEventListener("click", () => {
   tmNotifyParentSize();
 });
 
-/* DRAG THE ACTUAL TUMBLR IFRAME */
+/* ==========================================
+   DRAG THE ACTUAL TUMBLR IFRAME
+   ========================================== */
+
 const header = document.getElementById("tm-header");
+
 let dragging = false;
 let previousScreenX = 0;
 let previousScreenY = 0;
 
 header.addEventListener("pointerdown", event => {
   if (event.target.closest("button")) return;
+
   dragging = true;
+
   previousScreenX = event.screenX;
   previousScreenY = event.screenY;
+
   tm.classList.add("tm-dragging");
+
   header.setPointerCapture(event.pointerId);
-  window.parent.postMessage({ type: "tm-player-drag-start" }, "*");
+
+  window.parent.postMessage({
+    type: "tm-player-drag-start"
+  }, "*");
+
   event.preventDefault();
 });
 
 header.addEventListener("pointermove", event => {
   if (!dragging) return;
+
   const dx = event.screenX - previousScreenX;
   const dy = event.screenY - previousScreenY;
+
   previousScreenX = event.screenX;
   previousScreenY = event.screenY;
+
   if (dx || dy) {
-    window.parent.postMessage({ type: "tm-player-drag-move", dx, dy }, "*");
+    window.parent.postMessage({
+      type: "tm-player-drag-move",
+      dx,
+      dy
+    }, "*");
   }
 });
 
 function tmFinishDragging() {
   if (!dragging) return;
+
   dragging = false;
+
   tm.classList.remove("tm-dragging");
-  window.parent.postMessage({ type: "tm-player-drag-end" }, "*");
+
+  window.parent.postMessage({
+    type: "tm-player-drag-end"
+  }, "*");
 }
+
 header.addEventListener("pointerup", tmFinishDragging);
 header.addEventListener("pointercancel", tmFinishDragging);
 window.addEventListener("blur", tmFinishDragging);
 
-/* RECEIVE VIEWPORT SIZE FROM TUMBLR */
+/* ==========================================
+   RECEIVE VIEWPORT SIZE FROM TUMBLR
+   ========================================== */
+
 window.addEventListener("message", event => {
   if (event.source !== window.parent || !event.data) return;
+
   if (event.data.type === "tm-parent-viewport") {
     tmParentViewport = {
       width: Number(event.data.width) || window.innerWidth,
       height: Number(event.data.height) || window.innerHeight
     };
-    if (tmPlaylist.classList.contains("open")) tmUpdatePlaylistLimit();
+
+    if (tmPlaylist.classList.contains("open")) {
+      tmUpdatePlaylistLimit();
+    }
   }
 });
 
-/* KEEP THE PARENT'S IFRAME SIZE IN SYNC */
+/* ==========================================
+   KEEP PARENT IFRAME SIZE IN SYNC
+   ========================================== */
+
 if ("ResizeObserver" in window) {
   const tmObserver = new ResizeObserver(tmNotifyParentSize);
+
   tmObserver.observe(tm);
   tmObserver.observe(tmToggle);
 }
+
 window.addEventListener("load", tmNotifyParentSize);
 window.addEventListener("resize", tmNotifyParentSize);
 
-/* START */
+/* ==========================================
+   START
+   ========================================== */
+
 tmRenderPlaylist();
 tmLoadSong(0, true);
 tmNotifyParentSize();
+
 </script>
 </body>
 </html>
