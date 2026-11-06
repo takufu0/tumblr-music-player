@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +7,9 @@
 <script src="https://cdn.embed.ly/player-0.1.0.min.js"></script>
 
 <style>
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
 html, body {
   margin: 0;
@@ -23,87 +24,202 @@ body {
   background: transparent;
 }
 
+/* MAIN PLAYER */
+
 #tm-player {
   position: fixed;
   left: 15px;
   top: 15px;
   width: 330px;
-  overflow: visible;
   max-width: 100vw;
-  padding: 16px;
-  background: #101014;
-  color: #fff;
-  border: 1px solid #38383f;
-  border-radius: 16px;
-  box-shadow: 0 10px 35px rgba(0,0,0,.65);
-  z-index: 999999;
+  overflow: visible;
   isolation: isolate;
+  z-index: 999999;
+  padding: 16px;
+  background-color: #171619;
+  color: #e6e0df;
+  border: 2px solid #0d0d0d;
+  border-radius: 5px;
+  box-shadow:
+    0 0 0 3px #17151a,
+    0 0 0 4px #000000,
+    0 12px 35px rgba(0,0,0,.85),
+    inset 0 0 22px rgba(0,0,0,.8);
+  transition:
+    height 0.45s cubic-bezier(.22,.61,.36,1),
+    width 0.45s ease,
+    box-shadow 0.35s ease;
 }
 
 #tm-player.tm-dragging {
   transition: none;
 }
 
-#tm-player.hidden { display: none; }
+#tm-player.hidden {
+  display: none;
+}
+
+/* MARBLE BACKGROUND */
+
+.tm-marble-bg {
+  position: absolute !important;
+  inset: 0;
+  z-index: 0 !important;
+  border-radius: inherit;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.tm-marble-bg img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+#tm-player > * {
+  position: relative;
+  z-index: 1;
+}
+
+#tm-player > .tm-marble-bg {
+  position: absolute !important;
+  inset: 0;
+  z-index: 0 !important;
+}
+
+/* ORNAMENTAL FRAME */
+
+#tm-player::before {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  border: 1px solid rgba(33,33,33,.48);
+  pointer-events: none;
+  z-index: 10;
+}
+
+#tm-player::after {
+  content: "";
+  position: absolute;
+  inset: -15px;
+  pointer-events: none;
+  z-index: 20;
+  background-image:
+    url("corner-tl.png"),
+    url("corner-tr.png"),
+    url("corner-bl.png"),
+    url("corner-br.png");
+  background-repeat: no-repeat;
+  background-size: 85px 85px, 85px 85px, 85px 85px, 85px 85px;
+  background-position: top left, top right, bottom left, bottom right;
+}
+
+#tm-player.minimized::after {
+  inset: -13px;
+  background-size: 65px 65px, 65px 65px, 65px 65px, 65px 65px;
+}
+
+/* HEADER */
 
 #tm-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 15px;
+  padding: 0 3px 12px;
+  border-bottom: 1px solid #716b73;
   cursor: grab;
   touch-action: none;
   user-select: none;
 }
 
-#tm-header:active { cursor: grabbing; }
-
-.tm-header-title {
-  font-size: 12px;
-  letter-spacing: 2px;
-  color: #f00;
-  font-weight: bold;
+#tm-header:active {
+  cursor: grabbing;
 }
 
-.tm-header-buttons { display: flex; gap: 6px; }
+.tm-header-title {
+  color: #d0c5c6;
+  font-family: Georgia, serif;
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 3px;
+  text-shadow: 0 1px 5px #000;
+}
+
+.tm-header-title::before,
+.tm-header-title::after {
+  color: #c0b4b6;
+}
+
+.tm-header-title::before {
+  content: "✧ ";
+}
+
+.tm-header-title::after {
+  content: " ✧";
+}
+
+.tm-header-buttons {
+  display: flex;
+  gap: 6px;
+}
 
 .tm-header-buttons button {
   width: 25px;
   height: 25px;
-  border: 0;
-  border-radius: 6px;
-  background: #29292f;
-  color: #fff;
+  background: linear-gradient(145deg, #77717a, #29262d);
+  color: #eee7e5;
+  border: 1px solid #1b1a1a;
+  border-radius: 2px;
+  box-shadow: inset 0 1px 2px rgba(255,255,255,.2);
   cursor: pointer;
   font-size: 15px;
 }
 
-.tm-header-buttons button:hover { background: #f00; }
+.tm-header-buttons button:hover {
+  background: #a69a9d;
+  color: #171419;
+}
+
+/* ARTWORK AND VINYL */
 
 #tm-artwork {
-  width: 100%;
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
   padding: 5px 0 17px;
-  position: relative;
   overflow: visible;
 }
 
 #tm-vinyl {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 220px;
   height: 220px;
   max-width: 100%;
   aspect-ratio: 1 / 1;
   border-radius: 50%;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: repeating-radial-gradient(circle at center,
-    #080808 0px, #242428 2px, #080808 4px, #19191d 6px, #080808 8px);
-  border: 5px solid #050505;
-  box-shadow: 0 8px 22px rgba(0,0,0,.7), inset 0 0 0 2px #414149;
+  border: 5px solid #17151a;
+  background: repeating-radial-gradient(
+    circle at center,
+    #050505 0px,
+    #29272c 2px,
+    #09090b 4px,
+    #1a191e 6px,
+    #050505 8px
+  );
+  box-shadow:
+    0 8px 25px rgba(0,0,0,.9),
+    0 0 0 2px #817980,
+    inset 0 0 0 2px #100f0f;
   will-change: transform;
 }
 
@@ -127,48 +243,54 @@ body {
 
 #tm-vinyl-label {
   position: relative;
-  width: 94px;
-  height: 94px;
-  border-radius: 50%;
-  overflow: hidden;
-  background: #f00;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 3px solid #080808;
+  width: 94px;
+  height: 94px;
+  overflow: hidden;
+  border-radius: 50%;
+  border: 3px solid #17151a;
+  background: radial-gradient(circle, #c2b8b8, #49434b 75%);
+  box-shadow: 0 0 0 1px #aaa0a1;
   z-index: 1;
 }
 
 #tm-cover {
+  display: none;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: none;
 }
 
-.tm-note { font-size: 30px; color: #fff; }
+.tm-note {
+  color: #28232b;
+  font-size: 30px;
+}
 
 #tm-vinyl-spindle {
   position: absolute;
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  background: #fff;
-  border: 2px solid #f00;
+  background: #e1d8d5;
+  border: 2px solid #55505a;
   z-index: 3;
   pointer-events: none;
 }
+
+/* TONEARM */
 
 #tm-tonearm-svg {
   position: absolute;
   top: -5px;
   left: calc(58% - 1px);
+  display: block;
   width: 120px;
   height: 150px;
   overflow: visible;
   z-index: 6;
   pointer-events: none;
-  display: block;
 }
 
 #tone-arm {
@@ -182,28 +304,37 @@ body {
   transform: rotate(8deg);
 }
 
-#tm-player.minimized #tm-tonearm-svg { display: none; }
+#tm-player.minimized #tm-tonearm-svg {
+  display: none;
+}
+
+/* TRACK INFORMATION */
 
 #tm-status {
-  text-align: center;
-  font-size: 10px;
-  color: #777780;
   margin-top: -8px;
   margin-bottom: 12px;
-  letter-spacing: 1px;
+  color: #a69ba1;
+  font-family: Georgia, serif;
+  font-size: 10px;
+  font-style: italic;
+  letter-spacing: 2px;
+  text-align: center;
 }
 
 #tm-track {
-  text-align: left;
-  margin-bottom: 15px;
   min-width: 0;
+  margin-bottom: 15px;
+  text-align: left;
 }
 
 #tm-title {
-  font-size: 16px;
-  font-weight: bold;
   margin-bottom: 5px;
-  color: #f00;
+  color: #e0d5d3;
+  font-family: Georgia, serif;
+  font-size: 16px;
+  font-weight: normal;
+  letter-spacing: .7px;
+  text-shadow: 0 2px 5px #000;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -211,34 +342,43 @@ body {
 
 #tm-subtitle {
   display: none;
-  font-size: 10px;
-  color: #777780;
   margin-top: -2px;
   margin-bottom: 5px;
+  color: #aaa0a5;
+  font-family: Georgia, serif;
+  font-size: 10px;
+  font-style: italic;
   letter-spacing: .5px;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
 
-#tm-artist { font-size: 12px; color: #a5a5ad; }
+#tm-artist {
+  color: #b9afb2;
+  font-family: Georgia, serif;
+  font-size: 12px;
+  letter-spacing: .5px;
+}
+
+/* PROGRESS BAR */
 
 #tm-progress-wrap {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 10px;
-  color: #a5a5ad;
   margin-bottom: 15px;
+  color: #a5a5ad;
+  font-size: 10px;
 }
 
 #tm-progress {
   flex: 1;
   min-width: 0;
-  height: 3px;
+  height: 4px;
   appearance: none;
   -webkit-appearance: none;
-  background: #414149;
+  background: linear-gradient(to right, #b9afb2, #39343d);
   border-radius: 10px;
   outline: none;
   cursor: pointer;
@@ -250,7 +390,8 @@ body {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #f00;
+  background: #d7ccca;
+  box-shadow: 0 0 5px #aaa0a1;
 }
 
 #tm-progress::-moz-range-thumb {
@@ -258,8 +399,11 @@ body {
   height: 10px;
   border: 0;
   border-radius: 50%;
-  background: #f00;
+  background: #d7ccca;
+  box-shadow: 0 0 5px #aaa0a1;
 }
+
+/* PLAYBACK CONTROLS */
 
 #tm-controls {
   display: flex;
@@ -270,96 +414,132 @@ body {
 }
 
 #tm-controls button {
-  border: 0;
-  background: transparent;
-  color: #fff;
-  cursor: pointer;
-  font-size: 18px;
-  width: 38px;
-  height: 38px;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: 0;
   border-radius: 50%;
+  background: transparent;
+  color: #c4b9bb;
+  font-family: Georgia, serif;
+  font-size: 18px;
+  cursor: pointer;
+  transition: color .2s, transform .2s, background .2s;
 }
 
-#tm-controls button:hover { color: #f00; }
+#tm-controls button:hover {
+  color: #fff;
+  transform: scale(1.12);
+}
 
 #tm-controls #tm-play {
   width: 47px;
   height: 47px;
+  border: 2px solid #ded3d0;
   border-radius: 50%;
-  background: #f00;
-  color: #fff;
+  background: linear-gradient(145deg, #bdb2b3, #514b55);
+  color: #171419;
   font-size: 19px;
+  box-shadow:
+    0 3px 10px rgba(0,0,0,.7),
+    inset 0 1px 3px rgba(255,255,255,.5);
 }
 
-#tm-controls #tm-play:hover { background: #ff5360; }
-#tm-controls button.active { color: #f00; }
+#tm-controls #tm-play:hover {
+  background: linear-gradient(145deg, #e3d9d6, #8c8188);
+}
+
+#tm-controls button.active {
+  color: #e5c8cf;
+}
+
+/* PLAYLIST AND VOLUME TOOLS */
 
 #tm-tools {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-top: 1px solid #38383f;
-  padding-top: 12px;
+  padding: 12px 3px;
+  border-top: 1px solid #6c646e;
+  border-bottom: 1px solid rgb(28,28,28);
 }
 
 #tm-tools button {
-  background: transparent;
-  border: 0;
-  color: #a5a5ad;
-  cursor: pointer;
-  font-size: 12px;
   padding: 5px;
+  border: 0;
   border-radius: 6px;
+  background: transparent;
+  color: #c1b5b8;
+  font-family: Georgia, serif;
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  cursor: pointer;
 }
 
 #tm-tools button:hover,
 #tm-tools button.active {
   color: #fff;
-  background: #29292f;
+  background: rgba(190,180,190,.12);
 }
 
 .tm-tool-label {
   display: flex;
   align-items: center;
   gap: 6px;
-  letter-spacing: 1px;
   font-size: 10px;
+  letter-spacing: 1px;
 }
+
+/* PLAYLIST */
 
 #tm-playlist {
   display: none;
-  border-top: 1px solid #38383f;
+  max-height: 150px;
   margin-top: 10px;
   padding-top: 8px;
-  max-height: 150px;
   overflow-y: auto;
   overscroll-behavior: contain;
+  border-top: 1px solid #756c75;
+  scrollbar-color: #8b8089 #17151a;
 }
 
-#tm-playlist.open { display: block; }
+#tm-playlist.open {
+  display: block;
+}
 
 .tm-song {
-  width: 100%;
-  padding: 9px;
-  border: 0;
-  border-radius: 7px;
-  background: transparent;
-  color: #fff;
-  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  text-align: left;
+  width: 100%;
+  padding: 9px;
+  border: 0;
+  border-bottom: 1px solid rgba(180,170,180,.12);
+  border-radius: 2px;
+  background: transparent;
+  color: #e0d7d8;
+  font-family: Georgia, serif;
   font-size: 12px;
+  text-align: left;
+  cursor: pointer;
 }
 
-.tm-song:hover { background: #29292f; }
-.tm-song.active { background: #3b171c; color: #ff6b75; }
-.tm-song-info { min-width: 0; }
+.tm-song:hover {
+  background: rgba(190,180,190,.12);
+}
+
+.tm-song.active {
+  background: linear-gradient(90deg, rgba(150,125,140,.22), transparent);
+  color: #ead4dc;
+  border-left: 2px solid #b7a5b1;
+}
+
+.tm-song-info {
+  min-width: 0;
+}
 
 .tm-song-title {
   display: block;
@@ -370,61 +550,65 @@ body {
 
 .tm-song-artist {
   display: block;
-  color: #a5a5ad;
-  font-size: 10px;
   margin-top: 3px;
+  color: #a99da4;
+  font-size: 10px;
+  font-style: italic;
 }
 
 .tm-song-playing {
-  color: #f00;
   flex-shrink: 0;
+  color: #d6c3ce;
 }
+
+#tm-playlist::-webkit-scrollbar {
+  width: 5px;
+}
+
+#tm-playlist::-webkit-scrollbar-track {
+  background: #17151a;
+}
+
+#tm-playlist::-webkit-scrollbar-thumb {
+  background: #827782;
+  border-radius: 2px;
+}
+
+/* VOLUME PANEL */
 
 #tm-volume-panel {
   display: none;
   align-items: center;
   gap: 10px;
-  border-top: 1px solid #38383f;
-  padding: 12px 5px 3px;
   margin-top: 10px;
-  color: #a5a5ad;
+  padding: 12px 5px 3px;
+  border-top: 1px solid #756c75;
+  color: #d1c5c7;
   font-size: 13px;
 }
 
-#tm-volume-panel.open { display: flex; }
+#tm-volume-panel.open {
+  display: flex;
+}
 
 #tm-volume {
   flex: 1;
   min-width: 0;
-  accent-color: #f00;
+  accent-color: #b9aab3;
   cursor: pointer;
 }
 
-#tm-player-toggle {
-  display: none;
-  position: fixed;
-  left: 0;
-  top: 0;
-  z-index: 999998;
-  border: 0;
-  border-radius: 50%;
-  width: 45px;
-  height: 45px;
-  background: #f00;
-  color: #fff;
-  font-size: 20px;
-  cursor: pointer;
-}
-
-#tm-player-toggle.visible { display: block; }
-#tm-player-toggle:hover { background: #ff5360; }
+/* MINIMIZED PLAYER */
 
 #tm-player.minimized {
   width: 270px;
   padding: 12px;
+  border-radius: 4px;
 }
 
-#tm-player.minimized #tm-header { margin-bottom: 10px; }
+#tm-player.minimized #tm-header {
+  margin-bottom: 10px;
+}
 
 #tm-player.minimized #tm-content {
   display: grid;
@@ -434,12 +618,12 @@ body {
 }
 
 #tm-player.minimized #tm-artwork {
-  width: 64px;
-  height: 64px;
-  padding: 0;
-  margin: 0;
   grid-column: 1;
   grid-row: 1;
+  width: 64px;
+  height: 64px;
+  margin: 0;
+  padding: 0;
 }
 
 #tm-player.minimized #tm-vinyl {
@@ -454,7 +638,9 @@ body {
   border-width: 1px;
 }
 
-#tm-player.minimized .tm-note { font-size: 12px; }
+#tm-player.minimized .tm-note {
+  font-size: 12px;
+}
 
 #tm-player.minimized #tm-vinyl-spindle {
   width: 5px;
@@ -462,24 +648,33 @@ body {
   border-width: 1px;
 }
 
-#tm-player.minimized #tm-vinyl::before { inset: 5px; }
-#tm-player.minimized #tm-vinyl::after { inset: 2px; }
+#tm-player.minimized #tm-vinyl::before {
+  inset: 5px;
+}
+
+#tm-player.minimized #tm-vinyl::after {
+  inset: 2px;
+}
 
 #tm-player.minimized #tm-track {
   grid-column: 2;
   grid-row: 1;
-  margin: 0;
   min-width: 0;
+  margin: 0;
 }
 
-#tm-player.minimized #tm-title { font-size: 13px; }
+#tm-player.minimized #tm-title {
+  font-size: 13px;
+}
 
 #tm-player.minimized #tm-subtitle {
-  font-size: 9px;
   margin-bottom: 3px;
+  font-size: 9px;
 }
 
-#tm-player.minimized #tm-artist { font-size: 11px; }
+#tm-player.minimized #tm-artist {
+  font-size: 11px;
+}
 
 #tm-player.minimized #tm-progress-wrap,
 #tm-player.minimized #tm-controls,
@@ -490,12 +685,53 @@ body {
   display: none !important;
 }
 
-#tm-playlist::-webkit-scrollbar { width: 5px; }
-#tm-playlist::-webkit-scrollbar-track { background: #101014; }
-#tm-playlist::-webkit-scrollbar-thumb {
-  background: #f00;
-  border-radius: 10px;
+/* REOPEN BUTTON */
+
+#tm-player-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 999998;
+  width: 45px;
+  height: 45px;
+  overflow: hidden;
+  border: 2px solid #242020;
+  border-radius: 50%;
+  background:
+    linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.55)),
+    url("marble.png");
+  background-size: cover;
+  background-position: center;
+  box-shadow:
+    0 3px 15px rgba(0,0,0,.8),
+    inset 0 0 8px rgba(0,0,0,.7);
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  transition: filter 0.3s ease, border-color 0.3s ease;
 }
+
+#tm-player-toggle.visible {
+  display: flex;
+}
+
+#tm-player-toggle:hover {
+  border-color: #d8d0d0;
+  filter: invert(1);
+}
+
+#tm-player-toggle img {
+  display: block;
+  width: 95%;
+  height: 95%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+/* HIDDEN WHYP PLAYER */
 
 #tm-whyp-host {
   position: fixed;
@@ -507,372 +743,6 @@ body {
   opacity: 0;
   pointer-events: none;
   z-index: -1;
-}
-
-/* ==========================================
-   GOTHIC VICTORIAN MUSIC BOX REDESIGN
-   ========================================== */
-
-#tm-player {
-  background-color: #171619;
-  color: #e6e0df;
-  border: 2px solid #0d0d0d;
-  border-radius: 5px;
-
-  box-shadow:
-    0 0 0 3px #17151a,
-    0 0 0 4px #000000,
-    0 12px 35px rgba(0,0,0,.85),
-    inset 0 0 22px rgba(0,0,0,.8);
-
-  /* Smoothly animate the actual player height */
-  transition:
-    height 0.45s cubic-bezier(.22,.61,.36,1),
-    width 0.45s ease,
-    box-shadow 0.35s ease;
-
-  position: fixed;
-}
-
-/* Marble background */
-.tm-marble-bg {
-  position: absolute !important;
-  inset: 0;
-  z-index: 0 !important;
-  border-radius: inherit;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.tm-marble-bg img {
-  position: absolute;
-  inset: 0;
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-}
-
-/* Inner ornamental silver frame */
-#tm-player::before {
-  content: "";
-  position: absolute;
-  inset: 7px;
-  border: 1px solid rgba(33, 33, 33, 0.48);
-  pointer-events: none;
-  z-index: 10;
-}
-
-/* Four separate ornaments */
-#tm-player::after {
-  content: "";
-  position: absolute;
-  inset: -15px;
-  pointer-events: none;
-  z-index: 20;
-
-  background-image:
-    url("corner-tl.png"),
-    url("corner-tr.png"),
-    url("corner-bl.png"),
-    url("corner-br.png");
-
-  background-repeat: no-repeat;
-
-  background-size:
-    85px 85px,
-    85px 85px,
-    85px 85px,
-    85px 85px;
-
-  background-position:
-    top left,
-    top right,
-    bottom left,
-    bottom right;
-}
-
-/* Smaller ornaments when minimized */
-#tm-player.minimized::after {
-  inset: -13px;
-
-  background-size:
-    65px 65px,
-    65px 65px,
-    65px 65px,
-    65px 65px;
-}
-
-/* Keep the contents above the marble */
-#tm-player > * {
-  position: relative;
-  z-index: 1;
-}
-
-/* Keep the marble layer behind everything */
-#tm-player > .tm-marble-bg {
-  position: absolute !important;
-  inset: 0;
-  z-index: 0 !important;
-}
-
-/* Ornate header */
-#tm-header {
-  border-bottom: 1px solid #716b73;
-  padding: 0 3px 12px;
-  margin-bottom: 15px;
-}
-
-.tm-header-title {
-  color: #d0c5c6;
-  font-family: Georgia, serif;
-  font-size: 11px;
-  letter-spacing: 3px;
-  text-shadow: 0 1px 5px #000;
-}
-
-.tm-header-title::before {
-  content: "✧ ";
-  color: #c0b4b6;
-}
-
-.tm-header-title::after {
-  content: " ✧";
-  color: #c0b4b6;
-}
-
-.tm-header-buttons button {
-  background: linear-gradient(145deg, #77717a, #29262d);
-  color: #eee7e5;
-  border: 1px solid #1b1a1a;
-  border-radius: 2px;
-  box-shadow: inset 0 1px 2px rgba(255,255,255,.2);
-}
-
-.tm-header-buttons button:hover {
-  background: #a69a9d;
-  color: #171419;
-}
-
-/* Obsidian vinyl */
-#tm-vinyl {
-  background:
-    repeating-radial-gradient(circle at center,
-      #050505 0px,
-      #29272c 2px,
-      #09090b 4px,
-      #1a191e 6px,
-      #050505 8px);
-
-  border: 5px solid #17151a;
-
-  box-shadow:
-    0 8px 25px rgba(0,0,0,.9),
-    0 0 0 2px #817980,
-    inset 0 0 0 2px #100f0f;
-}
-
-#tm-vinyl-label {
-  background: radial-gradient(circle, #c2b8b8, #49434b 75%);
-  border: 3px solid #17151a;
-  box-shadow: 0 0 0 1px #aaa0a1;
-}
-
-.tm-note { color: #28232b; }
-
-#tm-vinyl-spindle {
-  background: #e1d8d5;
-  border: 2px solid #55505a;
-}
-
-/* Track information */
-#tm-title {
-  color: #e0d5d3;
-  font-family: Georgia, serif;
-  font-weight: normal;
-  letter-spacing: .7px;
-  text-shadow: 0 2px 5px #000;
-}
-
-#tm-subtitle {
-  color: #aaa0a5;
-  font-family: Georgia, serif;
-  font-style: italic;
-}
-
-#tm-artist {
-  color: #b9afb2;
-  font-family: Georgia, serif;
-  letter-spacing: .5px;
-}
-
-#tm-status {
-  color: #a69ba1;
-  font-family: Georgia, serif;
-  font-style: italic;
-  letter-spacing: 2px;
-}
-
-/* Silver progress bar */
-#tm-progress {
-  background: linear-gradient(to right, #b9afb2, #39343d);
-  height: 4px;
-}
-
-#tm-progress::-webkit-slider-thumb {
-  background: #d7ccca;
-  box-shadow: 0 0 5px #aaa0a1;
-}
-
-#tm-progress::-moz-range-thumb {
-  background: #d7ccca;
-  box-shadow: 0 0 5px #aaa0a1;
-}
-
-/* Antique silver controls */
-#tm-controls button {
-  color: #c4b9bb;
-  font-family: Georgia, serif;
-  transition: color .2s, transform .2s, background .2s;
-}
-
-#tm-controls button:hover {
-  color: #fff;
-  transform: scale(1.12);
-}
-
-#tm-controls #tm-play {
-  background: linear-gradient(145deg, #bdb2b3, #514b55);
-  color: #171419;
-  border: 2px solid #ded3d0;
-
-  box-shadow:
-    0 3px 10px rgba(0,0,0,.7),
-    inset 0 1px 3px rgba(255,255,255,.5);
-}
-
-#tm-controls #tm-play:hover {
-  background: linear-gradient(145deg, #e3d9d6, #8c8188);
-}
-
-#tm-controls button.active { color: #e5c8cf; }
-
-/* Tool buttons */
-#tm-tools {
-  border-top: 1px solid #6c646e;
-  border-bottom: 1px solid rgb(28, 28, 28);
-  padding: 12px 3px;
-}
-
-#tm-tools button {
-  color: #c1b5b8;
-  font-family: Georgia, serif;
-  letter-spacing: 1.5px;
-}
-
-#tm-tools button:hover,
-#tm-tools button.active {
-  color: #fff;
-  background: rgba(190,180,190,.12);
-}
-
-/* Gothic playlist */
-#tm-playlist {
-  border-top: 1px solid #756c75;
-  scrollbar-color: #8b8089 #17151a;
-}
-
-.tm-song {
-  border-radius: 2px;
-  border-bottom: 1px solid rgba(180,170,180,.12);
-  color: #e0d7d8;
-  font-family: Georgia, serif;
-}
-
-.tm-song:hover { background: rgba(190,180,190,.12); }
-
-.tm-song.active {
-  background: linear-gradient(90deg, rgba(150,125,140,.22), transparent);
-  color: #ead4dc;
-  border-left: 2px solid #b7a5b1;
-}
-
-.tm-song-artist {
-  color: #a99da4;
-  font-style: italic;
-}
-
-.tm-song-playing { color: #d6c3ce; }
-
-/* Volume panel */
-#tm-volume-panel {
-  border-top: 1px solid #756c75;
-  color: #d1c5c7;
-}
-
-#tm-volume { accent-color: #b9aab3; }
-
-/* Gothic marble reopen button */
-#tm-player-toggle {
-  display: none;
-  position: fixed;
-  left: 0;
-  top: 0;
-  z-index: 999998;
-  width: 45px;
-  height: 45px;
-  border-radius: 50%;
-  overflow: hidden;
-
-  background:
-    linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.55)),
-    url("marble.png");
-
-  background-size: cover;
-  background-position: center;
-
-  border: 2px solid #242020;
-
-  box-shadow:
-    0 3px 15px rgba(0,0,0,.8),
-    inset 0 0 8px rgba(0,0,0,.7);
-
-  color: #fff;
-  font-size: 20px;
-  cursor: pointer;
-}
-
-#tm-player-toggle.visible {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-#tm-player-toggle:hover {
-  border-color: #77717a;
-  filter: brightness(1.2);
-}
-
-#tm-player-toggle img {
-  width: 95%;
-  height: 95%;
-  object-fit: contain;
-  display: block;
-  pointer-events: none;
-  transition: filter 0.3s ease;
-}
-
-#tm-player-toggle:hover img { filter: invert(1); }
-
-/* Minimized music box */
-#tm-player.minimized { border-radius: 4px; }
-
-#tm-playlist::-webkit-scrollbar-track { background: #17151a; }
-
-#tm-playlist::-webkit-scrollbar-thumb {
-  background: #827782;
-  border-radius: 2px;
 }
 </style>
 </head>
@@ -1043,65 +913,108 @@ let tmParentViewport = {
 };
 
 /* ==========================================
-   SMOOTH PLAYER HEIGHT ANIMATION
+   PLAYER HEIGHT AND CONTENT ANIMATION
    ========================================== */
 
 let tmHeightAnimationHandler = null;
+let tmContentAnimation = null;
 
-function tmAnimatePlayerHeight(updateFunction) {
+function tmAnimatePlayerHeight(updateFunction, animateContent = false) {
 
-  /* Get the player's current visible height.
-     This also works if another animation is
-     already running. */
+  const content = document.getElementById("tm-content");
   const currentHeight = tm.getBoundingClientRect().height;
 
-  /* Remove any unfinished previous animation. */
+  /*
+    Only take the starting measurement when we are
+    specifically animating from minimized to maximized.
+  */
+  const firstRect = animateContent
+    ? content.getBoundingClientRect()
+    : null;
+
+  if (tmContentAnimation) {
+    tmContentAnimation.cancel();
+    tmContentAnimation = null;
+  }
+
   if (tmHeightAnimationHandler) {
     tm.removeEventListener("transitionend", tmHeightAnimationHandler);
     tmHeightAnimationHandler = null;
   }
 
-  /* Temporarily freeze the player at its
-     current visible height. */
   tm.style.transition = "none";
   tm.style.height = currentHeight + "px";
 
-  /* Make the requested change:
-     opening or closing playlist/volume. */
+  // Apply the new layout.
   updateFunction();
 
-  /* Temporarily allow natural height so we
-     can measure the new desired height. */
   tm.style.height = "auto";
+
   const targetHeight = tm.getBoundingClientRect().height;
 
-  /* Return to the starting height before
-     starting the transition. */
+  /*
+    The content animation is only created when animateContent
+    is true. Playlist and volume toggles won't trigger it.
+  */
+  if (animateContent) {
+
+    const lastRect = content.getBoundingClientRect();
+
+    const dx = firstRect.left - lastRect.left;
+    const dy = firstRect.top - lastRect.top;
+
+    const sx = lastRect.width
+      ? firstRect.width / lastRect.width
+      : 1;
+
+    const sy = lastRect.height
+      ? firstRect.height / lastRect.height
+      : 1;
+
+    if (lastRect.width > 0 && lastRect.height > 0) {
+
+      tmContentAnimation = content.animate(
+        [
+          {
+            transformOrigin: "top left",
+            transform: `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`
+          },
+          {
+            transformOrigin: "top left",
+            transform: "translate(0, 0) scale(1, 1)"
+          }
+        ],
+        {
+          duration: 450,
+          easing: "cubic-bezier(.22,.61,.36,1)"
+        }
+      );
+
+      tmContentAnimation.onfinish = () => {
+        tmContentAnimation = null;
+      };
+    }
+  }
+
+  // Animate the outer player height.
   tm.style.height = currentHeight + "px";
 
-  /* Force the browser to register the
-     starting height before animating. */
   tm.offsetHeight;
 
-  /* Restore the CSS transition. */
   tm.style.transition = "";
 
-  /* If the height hasn't changed, return
-     to automatic height without animating. */
   if (Math.abs(targetHeight - currentHeight) < 1) {
     tm.style.height = "auto";
     tmNotifyParentSize();
     return;
   }
 
-  /* Once the height animation finishes,
-     return to automatic height. This lets
-     the player adapt naturally to content. */
   tmHeightAnimationHandler = function(event) {
     if (event.target !== tm || event.propertyName !== "height") return;
 
     tm.removeEventListener("transitionend", tmHeightAnimationHandler);
     tmHeightAnimationHandler = null;
+
     tm.style.height = "auto";
 
     tmNotifyParentSize();
@@ -1109,7 +1022,6 @@ function tmAnimatePlayerHeight(updateFunction) {
 
   tm.addEventListener("transitionend", tmHeightAnimationHandler);
 
-  /* Start the animation on the next frame. */
   requestAnimationFrame(() => {
     tm.style.height = targetHeight + "px";
   });
@@ -1117,9 +1029,7 @@ function tmAnimatePlayerHeight(updateFunction) {
   tmNotifyParentSize();
 }
 
-/* ==========================================
-   PARENT IFRAME SIZE NOTIFICATION
-   ========================================== */
+/* PARENT IFRAME SIZE NOTIFICATION */
 
 let tmResizeQueued = false;
 
@@ -1143,9 +1053,7 @@ function tmNotifyParentSize() {
   });
 }
 
-/* ==========================================
-   PLAYLIST HEIGHT LIMIT
-   ========================================== */
+/* PLAYLIST HEIGHT LIMIT */
 
 function tmUpdatePlaylistLimit() {
 
@@ -1155,8 +1063,6 @@ function tmUpdatePlaylistLimit() {
     return;
   }
 
-  /* Temporarily measure the natural collapsed
-     player height, without the playlist. */
   const previousHeight = tm.style.height;
 
   tm.style.height = "auto";
@@ -1175,9 +1081,7 @@ function tmUpdatePlaylistLimit() {
   tmNotifyParentSize();
 }
 
-/* ==========================================
-   VINYL ROTATION
-   ========================================== */
+/* VINYL ROTATION */
 
 let tmVinylAngle = 0;
 let tmLastFrame = null;
@@ -1224,9 +1128,7 @@ function tmFormatTime(seconds) {
   return minutes + ":" + String(remaining).padStart(2, "0");
 }
 
-/* ==========================================
-   RENDER PLAYLIST
-   ========================================== */
+/* RENDER PLAYLIST */
 
 function tmRenderPlaylist() {
   tmPlaylist.innerHTML = "";
@@ -1263,9 +1165,7 @@ function tmRenderPlaylist() {
   });
 }
 
-/* ==========================================
-   LOAD SONG
-   ========================================== */
+/* LOAD SONG */
 
 function tmLoadSong(index, autoplay = false) {
   currentSong = (index + tmSongs.length) % tmSongs.length;
@@ -1431,9 +1331,7 @@ function tmLoadSong(index, autoplay = false) {
   });
 }
 
-/* ==========================================
-   PLAYBACK CONTROLS
-   ========================================== */
+/* PLAYBACK CONTROLS */
 
 function tmPlaySong() {
   if (whypPlayer) whypPlayer.play();
@@ -1479,11 +1377,8 @@ document.getElementById("tm-loop").addEventListener("click", function() {
   this.classList.toggle("active", isLoop);
 });
 
-/* ==========================================
-   DROPDOWNS WITH SMOOTH EXTENSION
-   ========================================== */
+/* PLAYLIST TOGGLE */
 
-/* Playlist button */
 document.getElementById("tm-playlist-toggle").addEventListener("click", function() {
 
   tmAnimatePlayerHeight(() => {
@@ -1496,7 +1391,8 @@ document.getElementById("tm-playlist-toggle").addEventListener("click", function
 
 });
 
-/* Volume button */
+/* VOLUME TOGGLE */
+
 document.getElementById("tm-volume-toggle").addEventListener("click", function() {
 
   tmAnimatePlayerHeight(() => {
@@ -1507,7 +1403,8 @@ document.getElementById("tm-volume-toggle").addEventListener("click", function()
 
 });
 
-/* Volume slider */
+/* VOLUME SLIDER */
+
 tmVolume.addEventListener("input", () => {
   const volume = Number(tmVolume.value);
 
@@ -1519,9 +1416,7 @@ tmVolume.addEventListener("input", () => {
     volume === 0 ? "×" : "♫";
 });
 
-/* ==========================================
-   SEEK BAR
-   ========================================== */
+/* SEEK BAR */
 
 tmProgress.addEventListener("input", () => {
   isSeeking = true;
@@ -1541,17 +1436,27 @@ tmProgress.addEventListener("change", () => {
   isSeeking = false;
 });
 
-/* ==========================================
-   MINIMIZE, HIDE AND REOPEN
-   ========================================== */
+/* MINIMIZE, MAXIMIZE, HIDE AND REOPEN */
 
 document.getElementById("tm-minimize").addEventListener("click", function() {
 
+  // Check the player's state BEFORE changing it.
+  const wasMinimized = tm.classList.contains("minimized");
+
+  /*
+    Only animate the contents when the player is being
+    restored from minimized to maximized.
+  */
   tmAnimatePlayerHeight(() => {
+
     tm.classList.toggle("minimized");
 
-    this.textContent = tm.classList.contains("minimized") ? "+" : "−";
-  });
+    const isMinimized = tm.classList.contains("minimized");
+
+    this.textContent = isMinimized ? "+" : "−";
+    this.title = isMinimized ? "Maximize" : "Minimize";
+
+  }, wasMinimized);
 
 });
 
@@ -1567,9 +1472,7 @@ tmToggle.addEventListener("click", () => {
   tmNotifyParentSize();
 });
 
-/* ==========================================
-   DRAG THE ACTUAL TUMBLR IFRAME
-   ========================================== */
+/* DRAG THE ACTUAL TUMBLR IFRAME */
 
 const header = document.getElementById("tm-header");
 
@@ -1630,9 +1533,7 @@ header.addEventListener("pointerup", tmFinishDragging);
 header.addEventListener("pointercancel", tmFinishDragging);
 window.addEventListener("blur", tmFinishDragging);
 
-/* ==========================================
-   RECEIVE VIEWPORT SIZE FROM TUMBLR
-   ========================================== */
+/* RECEIVE VIEWPORT SIZE FROM TUMBLR */
 
 window.addEventListener("message", event => {
   if (event.source !== window.parent || !event.data) return;
@@ -1649,9 +1550,7 @@ window.addEventListener("message", event => {
   }
 });
 
-/* ==========================================
-   KEEP PARENT IFRAME SIZE IN SYNC
-   ========================================== */
+/* KEEP PARENT IFRAME SIZE IN SYNC */
 
 if ("ResizeObserver" in window) {
   const tmObserver = new ResizeObserver(tmNotifyParentSize);
@@ -1663,9 +1562,7 @@ if ("ResizeObserver" in window) {
 window.addEventListener("load", tmNotifyParentSize);
 window.addEventListener("resize", tmNotifyParentSize);
 
-/* ==========================================
-   START
-   ========================================== */
+/* START */
 
 tmRenderPlaylist();
 tmLoadSong(0, true);
